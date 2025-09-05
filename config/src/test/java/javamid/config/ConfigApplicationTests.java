@@ -1,10 +1,10 @@
-package javamid.template;
+package javamid.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TemplateApplicationTests {
+class ConfigApplicationTests {
 
 	@Test
 	void contextLoads() {

@@ -1,15 +1,3 @@
-API Gateway	8080	
-Config Server	8888	
-Service Discovery (Eureka)	8761	
-Spring Boot Admin	9090	
-RabbitMQ Management	15672	15673
-Keycloak	8080	8081, 8443
-
-user-service: 8081
-order-service: 8082  
-payment-service: 8083
-notification-service: 8084
-
 
 
 
@@ -25,6 +13,8 @@ flowchart LR
     EX_GEN[Exchange Generator<br>Генерация курсов валют]
     BLOCKER[Blocker Service<br>Блокировка операций]
     NOTIFY[Notifications Service<br>Уведомления]
+    GATEWAY[API gateway<br>+ Externalized config]
+    DISCOVERY[Discovery service]
 
 %% Взаимодействия
     FRONT -- "REST/JSON<br> GET /api/accounts" --> ACCOUNTS
@@ -42,7 +32,5 @@ flowchart LR
     TRANSFER  --> NOTIFY
     EX_GEN  --> EXCHANGE
 ```
-
-
 
 
