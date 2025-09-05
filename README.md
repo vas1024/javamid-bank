@@ -5,12 +5,6 @@ Spring Boot Admin	9090
 RabbitMQ Management	15672	15673
 Keycloak	8080	8081, 8443
 
-user-service: 8081
-order-service: 8082  
-payment-service: 8083
-notification-service: 8084
-
-
 
 
 ```mermaid
@@ -42,7 +36,5 @@ flowchart LR
     TRANSFER  --> NOTIFY
     EX_GEN  --> EXCHANGE
 ```
-
-
 
 
