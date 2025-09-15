@@ -1,5 +1,6 @@
 package javamid.accounts;
 
+import javamid.accounts.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
