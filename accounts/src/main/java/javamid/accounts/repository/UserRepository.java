@@ -1,4 +1,4 @@
-package javamid.accounts;
+package javamid.accounts.repository;
 
 import javamid.accounts.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;

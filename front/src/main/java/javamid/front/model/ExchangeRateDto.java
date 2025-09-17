@@ -1,4 +1,4 @@
-package javamid.exchange;
+package javamid.front.model;
 
 public class ExchangeRateDto {
   private String title;

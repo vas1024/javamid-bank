@@ -1,15 +1,276 @@
 package javamid.front;
 
+import javamid.front.model.Currency4html;
+import javamid.front.model.User;
+import javamid.front.model.ExchangeRateDto;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class FrontController {
 
-  @GetMapping("/")
-  public String getMain(){
 
-    return("main.html");
+  private final RestTemplate restTemplate;
+
+  public FrontController(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
   }
+
+
+  @GetMapping("/")
+  public String getRoot(){
+    return("redirect:/signup");
+  }
+
+
+  @GetMapping("/{id}")
+  public String getUserProfile(@PathVariable Long id, Model model) {
+    User currentUser = new User();
+    String errorMessage = "";
+    try {
+      // 1. Вызываем accounts сервис
+      ResponseEntity<User> response = restTemplate.getForEntity(
+              "http://localhost:8082/api/users/{id}",
+              User.class,
+              id
+      );
+      if (response.getStatusCode() == HttpStatus.OK && response.hasBody()) {
+        currentUser = response.getBody();
+
+        model.addAttribute("login", currentUser.getLogin());
+        model.addAttribute("name", currentUser.getName());
+        model.addAttribute("birthdate", currentUser.getBirthday()); // !! bithdate birthday
+        System.out.println( "user birthday " + currentUser.getBirthday());
+
+      }
+
+      // 2. Вызываем currency сервис для списка валют
+      ResponseEntity<List<ExchangeRateDto>> currencyResponse = restTemplate.exchange(
+              "http://localhost:8083/api/rates",
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
+      );
+      if ( currencyResponse.getStatusCode() == HttpStatus.OK && currencyResponse.hasBody()) {
+        List<ExchangeRateDto> rates = currencyResponse.getBody();
+        List<Currency4html> currencies = rates.stream()
+                .map(rate -> new Currency4html(rate.getName(), rate.getTitle()))
+                .collect(Collectors.toList());
+        model.addAttribute("currency", currencies);
+      }
+
+      ResponseEntity<List<User>> allUsersResponse = restTemplate.exchange(
+              "http://localhost:8082/api/users",
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<User>>() {}
+      );
+      if ( allUsersResponse.getStatusCode() == HttpStatus.OK && allUsersResponse.hasBody()) {
+        List<User> allUsers = allUsersResponse.getBody();
+        final long currentUserId = currentUser.getId();
+        List<User> otherUsers = allUsers.stream()
+                .filter(user -> !user.getId().equals(currentUserId) )
+                .collect(Collectors.toList());
+
+        model.addAttribute("users", otherUsers);
+      }
+
+
+      return "main.html";
+
+      } catch (Exception e) {
+      // Обработка ошибок
+      model.addAttribute("errors", "Error with accounts or exchange service");
+      System.out.println("error with accounts or exchange service");
+    }
+
+    return "main.html";
+  }
+
+
+  @GetMapping("/signup")
+  public String getSignup(){
+    return "signup.html";
+  }
+
+  @PostMapping("/signup")
+  public String processSignup(
+          @RequestParam String login,
+          @RequestParam String password,
+          @RequestParam String confirm_password,
+          @RequestParam String name,
+          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate,
+          Model model) {
+
+
+    List<String> errors = new ArrayList<>();
+
+    // Валидация
+    if (!password.equals(confirm_password)) {
+      errors.add("Пароли не совпадают");
+    }
+
+    if (birthdate.isAfter(LocalDate.now().minusYears(18))) {
+      errors.add("Возраст должен быть не менее 18 лет");
+    }
+
+    // Если есть ошибки - показываем форму снова
+    if (!errors.isEmpty()) {
+      model.addAttribute("errors", errors);
+      model.addAttribute("login", login);
+      model.addAttribute("name", name);
+      model.addAttribute("birthdate", birthdate.toString());
+      return "signup";
+    }
+
+    try {
+      // Создаем DTO для отправки в account service
+      User user = new User( login, password, name, birthdate);
+
+      // Отправляем запрос в account service
+      ResponseEntity<User> response = restTemplate.postForEntity(
+              "http://localhost:8082/api/users",
+              user,
+              User.class
+      );
+
+      if (response.getStatusCode() == HttpStatus.CREATED) {
+        // Редирект на страницу успеха
+        User createdUser = response.getBody();
+        return "redirect:/" + createdUser.getId();
+      } else {
+        errors.add("Ошибка при создании пользователя");
+        model.addAttribute("errors", errors);
+        return "signup";
+      }
+
+    } catch (Exception e) {
+      errors.add("Пользователь с таким логином уже существует");
+      model.addAttribute("errors", errors);
+      model.addAttribute("login", login);
+      model.addAttribute("name", name);
+      model.addAttribute("birthdate", birthdate.toString());
+      return "signup";
+    }
+  }
+
+
+  /*
+  @PostMapping("/user/{id}/editPassword")
+  public String postEditPassword(@PathVariable Long id,
+                                 @RequestParam String password,
+                                 Model model){
+    System.out.println("hello from editPassword method");
+    return "main.html";
+  }
+  */
+
+  @PostMapping("/user/{id}/editPassword")
+  public String postEditPassword(
+          @PathVariable Long id,
+          @RequestParam String password,
+          @RequestParam String confirm_password,
+          Model model,
+          RedirectAttributes redirectAttributes) {
+
+    // Сохраняем все текущие атрибуты модели
+    Map<String, Object> modelAttributes = model.asMap();
+    modelAttributes.forEach(redirectAttributes::addFlashAttribute);
+
+    // validation
+    List<String> errors = new ArrayList<>();
+    if (!password.equals(confirm_password)) {
+      errors.add("Пароли не совпадают");
+    }
+    if (password.length() < 1 ) {
+      errors.add("Пароль должен быть не менее 1 символов");
+    }
+    if (!errors.isEmpty()) {
+      redirectAttributes.addFlashAttribute("errors", errors);
+      return "redirect:/" + id;
+    }
+
+    try {
+      restTemplate.postForObject(
+              "http://localhost:8082/api/users/{id}/password?newPassword={password}",
+              null,
+              Void.class,
+              id, password
+      );
+      redirectAttributes.addFlashAttribute("message", "Пароль успешно изменен!");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("errors",
+              List.of("Ошибка при изменении пароля: " + e.getMessage()));
+    }
+
+    return "redirect:/" + id;
+  }
+
+
+
+  @PostMapping("/user/{id}/editUserAccounts")
+  public String postEditUserAccounts(
+          @PathVariable Long id,
+          @RequestParam String name,
+          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate,
+          Model model,
+          RedirectAttributes redirectAttributes) {
+
+
+    System.out.println("hi there!");
+    //validation
+    if ( birthdate != null && birthdate.isAfter(LocalDate.now().minusYears(18))) {
+      redirectAttributes.addFlashAttribute("errors", "Возраст должен быть не менее 18 лет");
+      return "redirect:/" + id ;
+    }
+
+    //filling map
+    Map<String, Object> updates = new HashMap<>();
+    if (name != null && !name.trim().isEmpty()) {
+      updates.put("name", name);
+    }
+    if (birthdate != null) {
+      updates.put("birthday", birthdate.toString()); // LocalDate сериализуется как список трех чисел
+    }
+
+    if(updates.size() == 0 ) {
+      redirectAttributes.addFlashAttribute("errors", "Нечего менять");
+      return "redirect:/" + id ;
+    }
+
+    try {
+      restTemplate.postForObject(
+              "http://localhost:8082/api/users/{id}",
+              updates,
+              Void.class,
+              id
+      );
+      redirectAttributes.addFlashAttribute("message", "Данные успешно обновлены!");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("errors",
+              List.of("Ошибка при обновлении данных: " + e.getMessage()));
+    }
+
+    return "redirect:/" + id ;
+  }
+
 
 }

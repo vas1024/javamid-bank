@@ -52,8 +52,9 @@ public class ExgenController {
       double newValue = originalRate.getValue() * (1 + changePercent);
       // Округляем до 2 знаков после запятой
       newValue = Math.round(newValue * 100.0) / 100.0;
-      modifiedRate.setValue(newValue);
-
+      if( ! "RUB".equalsIgnoreCase(originalRate.getName()) ) {
+        modifiedRate.setValue(newValue);
+      }
       modifiedRates.add(modifiedRate);
     }
 

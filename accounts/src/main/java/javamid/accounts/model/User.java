@@ -1,4 +1,4 @@
-package javamid.accounts;
+package javamid.accounts.model;
 
 import jakarta.persistence.*;
 
