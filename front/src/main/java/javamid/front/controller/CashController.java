@@ -1,0 +1,65 @@
+package javamid.front.controller;
+
+import javamid.front.model.CashDto;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Controller
+public class CashController {
+
+  private final RestTemplate restTemplate;
+
+  public CashController(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
+  }
+
+  @PostMapping("/user/{id}/cash")
+  public String postCash(@PathVariable Long id,
+                                   @RequestParam BigDecimal value,
+                                   @RequestParam String currency,
+                                   @RequestParam String action,
+                                   RedirectAttributes redirectAttributes) {
+
+    System.out.println("CashController: postCash: value " + value + "  currency " + currency + "  action " + action );
+    CashDto cashDto = new CashDto(id, value, currency);
+    System.out.println("CashController: postCash: cashDto: value " + cashDto.getValue() + "  currency " + cashDto.getCurrency() + "  action "  );
+    if ("PUT".equals(action)) {
+      try {
+        String result = restTemplate.postForObject(
+//                "http://localhost:8082/api/users/{id}/accounts/deposit",
+                "http://gateway/accounts/api/users/{id}/accounts/deposit",
+                cashDto,
+                String.class,
+                cashDto.getUserId()
+        );
+
+        if (result != null && result.startsWith("Error")) {
+          redirectAttributes.addFlashAttribute("cashErrors", result);
+          return "redirect:/" + id;
+        }
+
+      } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("cashErrors", e);
+        return "redirect:/" + id;
+      }
+
+      String message = "Деньги " + value + " " + currency + " успешно зачислены";
+      redirectAttributes.addFlashAttribute("message", message );
+      return "redirect:/" + id;
+    } else if ("GET".equals(action)) {
+      return "redirect:/" + id;
+    }
+
+    redirectAttributes.addFlashAttribute("cashErrors", "unknown action" );
+    return "redirect:/" + id;
+  }
+
+}

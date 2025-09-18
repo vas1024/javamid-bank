@@ -109,7 +109,7 @@ setInterval(() => {
         </form>
     </td></tr>
     <tr><td style="padding:2px;">
-        <form method="post" th:action="${'/user/'+login+'/cash'}">
+        <form method="post" th:action="${'/user/'+id+'/cash'}">
             <table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">
                 <tr th:if="${cashErrors!=null}" th:each="cashError : ${cashErrors}">
                     <td style="color:red;" th:text="${cashError}"/>

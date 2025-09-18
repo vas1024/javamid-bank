@@ -1,4 +1,4 @@
-package javamid.front;
+package javamid.front.controller;
 
 import javamid.front.model.Currency4html;
 import javamid.front.model.User;
@@ -48,7 +48,9 @@ public class FrontController {
     try {
       // 1. Вызываем accounts сервис
       ResponseEntity<User> response = restTemplate.getForEntity(
-              "http://localhost:8082/api/users/{id}",
+//              "http://localhost:8082/api/users/{id}",
+//              "http://localhost:8080/accounts/api/users/{id}",
+              "http://gateway/accounts/api/users/{id}",
               User.class,
               id
       );
@@ -64,7 +66,8 @@ public class FrontController {
 
       // 2. Вызываем currency сервис для списка валют
       ResponseEntity<List<ExchangeRateDto>> currencyResponse = restTemplate.exchange(
-              "http://localhost:8083/api/rates",
+//          "http://127.0.0.1:8083/api/rates",
+              "http://gateway/exchange/api/rates",
               HttpMethod.GET,
               null,
               new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
@@ -78,7 +81,8 @@ public class FrontController {
       }
 
       ResponseEntity<List<User>> allUsersResponse = restTemplate.exchange(
-              "http://localhost:8082/api/users",
+//              "http://localhost:8082/api/users",
+              "http://gateway/accounts/api/users",
               HttpMethod.GET,
               null,
               new ParameterizedTypeReference<List<User>>() {}
@@ -98,7 +102,7 @@ public class FrontController {
 
       } catch (Exception e) {
       // Обработка ошибок
-      model.addAttribute("errors", "Error with accounts or exchange service");
+      model.addAttribute("errors", "Err with accounts or exchange " + e.getMessage() );
       System.out.println("error with accounts or exchange service");
     }
 
@@ -147,7 +151,8 @@ public class FrontController {
 
       // Отправляем запрос в account service
       ResponseEntity<User> response = restTemplate.postForEntity(
-              "http://localhost:8082/api/users",
+//              "http://localhost:8082/api/users",
+              "http://gateway/accounts/api/users",
               user,
               User.class
       );
@@ -210,7 +215,8 @@ public class FrontController {
 
     try {
       restTemplate.postForObject(
-              "http://localhost:8082/api/users/{id}/password?newPassword={password}",
+//              "http://localhost:8082/api/users/{id}/password?newPassword={password}",
+              "http://gateway/accounts/api/users/{id}/password?newPassword={password}",
               null,
               Void.class,
               id, password
@@ -258,7 +264,8 @@ public class FrontController {
 
     try {
       restTemplate.postForObject(
-              "http://localhost:8082/api/users/{id}",
+//              "http://localhost:8082/api/users/{id}",
+              "http://gateway/accounts/api/users/{id}",
               updates,
               Void.class,
               id

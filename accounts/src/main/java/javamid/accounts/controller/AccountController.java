@@ -2,6 +2,7 @@ package javamid.accounts.controller;
 
 import javamid.accounts.model.Account;
 import javamid.accounts.service.AccountService;
+import javamid.accounts.model.CashDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,11 +56,18 @@ public class AccountController {
                     .body(account))
             .orElse(ResponseEntity.status(HttpStatus.CONFLICT).build()); // 409
 
-
   }
 
 
-
+  @PostMapping("/deposit")
+  public ResponseEntity<?> postDeposit( @RequestBody  CashDto cashDto ){
+    System.out.println( "AcountController: deposit: value " + cashDto.getValue() + "  currency "+cashDto.getCurrency()+"  userId "+cashDto.getUserId() );
+    String result = accountService.deposit( cashDto );
+    if( result.startsWith("Error")){
+      return ResponseEntity.badRequest().body(result);
+    }
+    return ResponseEntity.ok().body(result);
+  }
 
 
 }

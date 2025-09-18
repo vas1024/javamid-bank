@@ -2,6 +2,7 @@ package javamid.accounts.service;
 
 import jakarta.transaction.Transactional;
 import javamid.accounts.model.Account;
+import javamid.accounts.model.CashDto;
 import javamid.accounts.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +32,6 @@ public class AccountService {
   }
 
 
-
-
-
   public Optional<Account> getAccount(Long userId, String currency) {
     return accountRepository.findByUserIdAndCurrency(userId, currency);
   }
@@ -51,4 +49,35 @@ public class AccountService {
               return accountRepository.save(account);
             });
   }
+
+  public String deposit( CashDto cashDto ){
+
+    if (cashDto == null) { return ("Error: CashDto cannot be null"); }
+    Long userId = cashDto.getUserId();
+    BigDecimal value = cashDto.getValue();
+    String currency = cashDto.getCurrency();
+    if (userId == null) { return "Error: User ID cannot be null"; }
+    System.out.println("AccountService: deposit: value: " + value );
+    if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) { return "Error: Value must be positive"; }
+    if (currency == null || currency.trim().isEmpty()) { return "Currency cannot be null or empty"; }
+
+    Optional<Account> accountOptional = accountRepository.findByUserIdAndCurrency(userId,currency);
+    if( accountOptional.isEmpty() ) {
+      Account newAccount = new Account(userId, currency, value);
+      accountRepository.save( newAccount );
+    }
+    else {
+      Account account = accountOptional.get();
+      BigDecimal newBalance = account.getBalance().add(value);
+      account.setBalance( newBalance );
+      accountRepository.save(account);
+    }
+
+    Account account = accountRepository.findByUserIdAndCurrency(userId,currency).get();
+    System.out.println( "user " + account.getUserId() + " has account of " + account.getBalance() + " " + account.getCurrency() );
+    return "success";
+
+  }
+
+
 }
