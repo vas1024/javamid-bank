@@ -41,14 +41,7 @@ public class AccountService {
   }
 
 
-  public Optional<Account> withdraw(Long userId, String currency, BigDecimal amount) {
-    return accountRepository.findByUserIdAndCurrency(userId, currency)
-            .filter(account -> account.getBalance().compareTo(amount) >= 0)
-            .map(account -> {
-              account.setBalance(account.getBalance().subtract(amount));
-              return accountRepository.save(account);
-            });
-  }
+
 
   public String deposit( CashDto cashDto ){
 
@@ -78,6 +71,47 @@ public class AccountService {
     return "success";
 
   }
+
+
+  public String withdrawal( CashDto cashDto ){
+
+    System.out.println("withdrawal cashDto " + cashDto.getUserId()+" "+cashDto.getValue()+" "+cashDto.getCurrency());
+    String result = "";
+    if (cashDto == null) { return ("Error: CashDto cannot be null"); }
+    Long userId = cashDto.getUserId();
+    BigDecimal value = cashDto.getValue();
+    String currency = cashDto.getCurrency();
+    if (userId == null) { return "Error: User ID cannot be null"; }
+    if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) { return "Error: Value must be positive"; }
+    if (currency == null || currency.trim().isEmpty()) { return "Currency cannot be null or empty"; }
+
+    Optional<Account> accountOptional = accountRepository.findByUserIdAndCurrency(userId,currency);
+    if( accountOptional.isEmpty() ) {
+      return "Error: no such account";
+    }
+    else if ( accountOptional.get().getBalance().compareTo(BigDecimal.ZERO) == 0 ) {
+      return "Error: balance is 0";
+    }
+    else {
+      Account account = accountOptional.get();
+      BigDecimal newBalance = account.getBalance().subtract(value);
+      if( newBalance.compareTo(BigDecimal.ZERO) >= 0 ) account.setBalance( newBalance );
+      else {
+        result = "Warning: " + account.getBalance().toString();
+        account.setBalance(BigDecimal.ZERO);
+      }
+      accountRepository.save(account);
+    }
+
+    Account account = accountRepository.findByUserIdAndCurrency(userId,currency).get();
+    System.out.println( "user " + account.getUserId() + " has account of " + account.getBalance() + " " + account.getCurrency() );
+
+
+    if( result.isEmpty() ) return  "Success: ";
+    else return result;
+
+  }
+
 
 
 }

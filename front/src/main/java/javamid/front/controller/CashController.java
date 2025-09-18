@@ -32,10 +32,12 @@ public class CashController {
     CashDto cashDto = new CashDto(id, value, currency);
     System.out.println("CashController: postCash: cashDto: value " + cashDto.getValue() + "  currency " + cashDto.getCurrency() + "  action "  );
     if ("PUT".equals(action)) {
+      String result;
       try {
-        String result = restTemplate.postForObject(
+        result = restTemplate.postForObject(
 //                "http://localhost:8082/api/users/{id}/accounts/deposit",
-                "http://gateway/accounts/api/users/{id}/accounts/deposit",
+//                "http://gateway/accounts/api/users/{id}/accounts/deposit",
+                "http://gateway/cash/api/deposit",
                 cashDto,
                 String.class,
                 cashDto.getUserId()
@@ -51,15 +53,49 @@ public class CashController {
         return "redirect:/" + id;
       }
 
-      String message = "Деньги " + value + " " + currency + " успешно зачислены";
+      String message = "Деньги " + value + " " + currency + " успешно зачислены. result " + result ;
       redirectAttributes.addFlashAttribute("message", message );
       return "redirect:/" + id;
+
     } else if ("GET".equals(action)) {
+
+      System.out.println( "CashController: postCash: action " + action );
+      String result;
+      try {
+        result = restTemplate.postForObject(
+                "http://gateway/cash/api/withdrawal",
+                cashDto,
+                String.class,
+                cashDto.getUserId()
+        );
+
+        if (result != null && result.startsWith("Error")) {
+          redirectAttributes.addFlashAttribute("cashErrors", result);
+          return "redirect:/" + id;
+        }
+
+      } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("cashErrors", e);
+        return "redirect:/" + id;
+      }
+
+      if (result != null && result.startsWith("Warning:")) {
+        redirectAttributes.addFlashAttribute("cashErrors",
+                "на этом счету больше нет средств. вам выдано " + result.substring(7) + " " + currency );
+        return "redirect:/" + id;
+      }
+
+      String message = "Вам выдано " + value + " " + currency ;
+      redirectAttributes.addFlashAttribute("message", message );
       return "redirect:/" + id;
+
     }
 
     redirectAttributes.addFlashAttribute("cashErrors", "unknown action" );
     return "redirect:/" + id;
   }
+
+
+
 
 }

@@ -63,9 +63,23 @@ public class AccountController {
   public ResponseEntity<?> postDeposit( @RequestBody  CashDto cashDto ){
     System.out.println( "AcountController: deposit: value " + cashDto.getValue() + "  currency "+cashDto.getCurrency()+"  userId "+cashDto.getUserId() );
     String result = accountService.deposit( cashDto );
+/*
     if( result.startsWith("Error")){
       return ResponseEntity.badRequest().body(result);
     }
+ */
+    return ResponseEntity.ok().body(result);
+  }
+
+  @PostMapping("/withdrawal")
+  public ResponseEntity<?> postWithdrawal( @RequestBody  CashDto cashDto ){
+    System.out.println( "AcountController: deposit: value " + cashDto.getValue() + "  currency "+cashDto.getCurrency()+"  userId "+cashDto.getUserId() );
+    String result = accountService.withdrawal( cashDto );
+/*
+    if( result.startsWith("Error")){
+      return ResponseEntity.badRequest().body(result);
+    }
+ */
     return ResponseEntity.ok().body(result);
   }
 
