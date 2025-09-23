@@ -13,18 +13,17 @@ import java.util.Random;
 
 @Controller
 public class ExgenController {
-  private String currencyServiceUrl = "http://localhost:8083";
-  private final RestTemplate restTemplate = new RestTemplate();
+
+  private final RestTemplate restTemplate;
   private final Random random = new Random();
 
-
+  public ExgenController( RestTemplate restTemplate ){ this.restTemplate = restTemplate; }
 
   public List<ExchangeRateDto> getRates() {
-    String url = currencyServiceUrl + "/api/rates";
 
     // Используем ParameterizedTypeReference для работы с List<>
     ResponseEntity<List<ExchangeRateDto>> response = restTemplate.exchange(
-            url,
+            "http://gateway/exchange/api/rates",
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
@@ -48,7 +47,7 @@ public class ExgenController {
       modifiedRate.setTitle(originalRate.getTitle());
       modifiedRate.setName(originalRate.getName());
 
-      double changePercent = (random.nextDouble() * 0.2) - 0.1; // -0.1 до +0.1
+      double changePercent = (random.nextDouble() * 0.1) - 0.05; // -0.05 до +0.05
       double newValue = originalRate.getValue() * (1 + changePercent);
       // Округляем до 2 знаков после запятой
       newValue = Math.round(newValue * 100.0) / 100.0;
@@ -64,7 +63,7 @@ public class ExgenController {
 
   // Отправляем обновленные курсы
   public void sendRates(List<ExchangeRateDto> rates) {
-    String url = currencyServiceUrl + "/api/bulk";
+    String url = "http://gateway/exchange/api/bulk";
     restTemplate.postForObject(url, rates, Void.class);
   }
 

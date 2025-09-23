@@ -3,6 +3,7 @@ package javamid.accounts.service;
 import jakarta.transaction.Transactional;
 import javamid.accounts.model.Account;
 import javamid.accounts.model.CashDto;
+import javamid.accounts.model.TransferDto;
 import javamid.accounts.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -113,5 +114,34 @@ public class AccountService {
   }
 
 
+  @Transactional
+  public String transfer( TransferDto transferDto ){
+    Long userIdFrom = transferDto.getUserIdFrom();
+    Long userIdTo = transferDto.getUserIdTo();
+    BigDecimal valueFrom = transferDto.getValueFrom();
+    BigDecimal valueTo = transferDto.getValueTo();
+    String currencyFrom = transferDto.getCurrencyFrom();
+    String currencyTo = transferDto.getCurrencyTo();
+    Optional<Account> accountFromOptional = accountRepository.findByUserIdAndCurrency(userIdFrom,currencyFrom);
+    if( accountFromOptional.isEmpty() ) { return "Error: no account from ";    }
+    Optional<Account> accountToOptional = accountRepository.findByUserIdAndCurrency(userIdTo,currencyTo);
+    if( accountToOptional.isEmpty() ) { return "Error: no account to ";    }
+    if ( valueFrom == null || valueFrom.compareTo(BigDecimal.ZERO) <= 0) { return "Error: valueFrom must be positive"; }
+    if ( valueTo == null || valueTo.compareTo(BigDecimal.ZERO) <= 0) { return "Error: valueTo must be positive"; }
+
+    Account accountFrom = accountFromOptional.get();
+    Account accountTo = accountToOptional.get();
+    if( accountFrom.getBalance().compareTo(valueFrom) < 0 ) return "Error: accountFrom has not enough money";
+
+    BigDecimal tmp = accountFrom.getBalance().subtract(valueFrom);
+    accountFrom.setBalance( tmp );
+    accountRepository.save( accountFrom );
+    tmp = accountTo.getBalance().add(valueTo);
+    accountTo.setBalance( tmp );
+    accountRepository.save( accountTo );
+
+    return "Succes: " + valueTo + " " + accountTo.getCurrency();
+
+  }
 
 }

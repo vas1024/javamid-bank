@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <script language="JavaScript">
 
-
 setInterval(() => {
     var td = document.getElementById('exchange_rates');
     fetch('http://localhost:8083/api/rates')
@@ -28,6 +27,54 @@ setInterval(() => {
         .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
 }, 1000);
     </script>
+
+    <script th:inline="javascript">
+        const userId = /*[[${id}]]*/ null;
+
+        setInterval(() => {
+            if (!userId) {
+                console.log('User ID not available');
+                return;
+            }
+            var td = document.getElementById('notifications');
+
+
+        const checkedCheckboxes = document.querySelectorAll('.note-checkbox:checked');
+        const readIds = [];
+        checkedCheckboxes.forEach(checkbox => {
+            readIds.push(checkbox.getAttribute('data-id'));
+        });
+        console.log('Отправляем на сервер ID:', readIds);
+        const params = new URLSearchParams();
+        readIds.forEach(id => params.append('noteId', id));
+
+
+
+            fetch('/api/notifications/' + userId + "?" + params.toString() )
+                .then(response => response.json())
+                .then(json => {
+                    var table = '<table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">';
+                    table += '<tr><th colspan="3">Уведомления</th></tr>';
+                    table += '<tr><th>ID</th><th>Сообщение</th><th>Прочитано</th></tr>';
+                    json.forEach(note => {
+                        table += '<tr>';
+                        table += '<td>' + (note.id || '') + '</td>';
+                        table += '<td>' + (note.message || '') + '</td>';
+                        table += '<td><input type="checkbox" class="note-checkbox" data-id="' + note.id + '" ' + (note.read ? 'checked' : '') + '></td>';
+                        table += '</tr>';
+                    });
+                    table += '</table>';
+                    td.innerHTML = table;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    td.innerHTML = 'Ошибка при получении уведомлений';
+                });
+        }, 3000);
+    </script>
+
+
+
 </head>
 
 <body>
@@ -135,7 +182,7 @@ setInterval(() => {
         </form>
     </td></tr>
     <tr><td style="padding:2px;">
-        <form method="post" th:action="${'/user/'+login+'/transfer'}">
+        <form method="post" th:action="${'/user/'+id+'/transfer'}">
             <table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">
                 <tr th:if="${transferErrors!=null}" th:each="transferError : ${transferErrors}">
                     <td style="color:red;" th:text="${transferError}"/>
@@ -158,7 +205,7 @@ setInterval(() => {
                         <input name="value" type="number" style="width:100%" required/>
                     </td>
                     <td style="text-align:right">
-                        <input hidden name="to_login" th:value="${login}"/>
+                        <input hidden name="to_id" th:value="${id}"/>
                         <button>Перевести</button>
                     </td>
                 </tr>
@@ -166,7 +213,7 @@ setInterval(() => {
         </form>
     </td></tr>
     <tr><td style="padding:2px;">
-        <form method="post" th:action="${'/user/'+login+'/transfer'}">
+        <form method="post" th:action="${'/user/'+id+'/transfer'}">
             <table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">
                 <tr th:if="${transferOtherErrors!=null}" th:each="transferOtherError : ${transferOtherErrors}">
                     <td style="color:red;" th:text="${transferOtherError}"/>
@@ -190,8 +237,8 @@ setInterval(() => {
                     </td>
                     <td>
                         Кому
-                        <select name="to_login">
-                            <option th:each="user : ${users}" th:value="${user.getLogin()}" th:text="${user.getName()}"/>
+                        <select name="to_id">
+                            <option th:each="user : ${users}" th:value="${user.getId()}" th:text="${user.getName()}"/>
                         </select>
                     </td>
                     <td style="text-align:right">
@@ -202,6 +249,8 @@ setInterval(() => {
         </form>
     </td></tr>
     <tr><td style="padding:2px;" id="exchange_rates">
+    </td></tr>
+    <tr><td style="padding:2px;" id="notifications">
     </td></tr>
 </table>
 </body>
