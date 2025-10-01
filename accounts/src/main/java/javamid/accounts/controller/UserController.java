@@ -1,5 +1,6 @@
 package javamid.accounts.controller;
 
+import javamid.accounts.model.AuthRequest;
 import javamid.accounts.service.UserService;
 import javamid.accounts.model.User;
 import org.slf4j.Logger;
@@ -39,18 +40,10 @@ public class UserController {
               .orElse(ResponseEntity.notFound().build());
   }
 
-/*
-POST http://localhost:8082/api/users
-  {
-    "login": "user1",
-          "password": "aaa",
-          "name": "Donald",
-          "birthday": "1990-01-01"
-  }
-  */
 
   @PostMapping
   public ResponseEntity<?> createUser(@RequestBody User user) {
+
     Map<String, Object> result = userService.save(user);
 
     if ((Boolean) result.get("success")) {
@@ -65,9 +58,13 @@ POST http://localhost:8082/api/users
 
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    userService.delete(id);
-    return ResponseEntity.noContent().build(); // 204
+  public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+
+    System.out.println( "UserController: delete user " + id );
+    String result = userService.delete(id);
+    System.out.println( result );
+    if ("SUCCESS".equals(result)) return ResponseEntity.noContent().build(); // 204
+    else return ResponseEntity.badRequest().body(result);
   }
 
   @PostMapping("/{id}/password")
@@ -89,5 +86,18 @@ POST http://localhost:8082/api/users
     userService.updateUser(id, updates);
     return ResponseEntity.ok().build();
   }
+
+  @PostMapping("/login")
+  public ResponseEntity<Long> postLogin(
+          @RequestBody AuthRequest authRequest ) {
+
+    String username = authRequest.getUsername();
+    String password = authRequest.getPassword();
+    logger.info("userController: request validate login for uname {}  pw {}", username, password );
+
+    return ResponseEntity.ok( userService.validateLogin( username, password ) );
+
+  }
+
 
 }

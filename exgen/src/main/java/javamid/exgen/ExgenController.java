@@ -47,7 +47,7 @@ public class ExgenController {
       modifiedRate.setTitle(originalRate.getTitle());
       modifiedRate.setName(originalRate.getName());
 
-      double changePercent = (random.nextDouble() * 0.1) - 0.05; // -0.05 до +0.05
+      double changePercent = (random.nextDouble() * 0.02) - 0.01; // -0.01 до +0.01
       double newValue = originalRate.getValue() * (1 + changePercent);
       // Округляем до 2 знаков после запятой
       newValue = Math.round(newValue * 100.0) / 100.0;

@@ -1,5 +1,7 @@
 package javamid.front.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import javamid.front.model.Currency4html;
 import javamid.front.model.User;
 import javamid.front.model.ExchangeRateDto;
@@ -24,6 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+
 @Controller
 public class FrontController {
 
@@ -40,7 +47,7 @@ public class FrontController {
     return("redirect:/signup");
   }
 
-
+/*
   @GetMapping("/{id}")
   public String getUserProfile(@PathVariable Long id, Model model) {
     User currentUser = new User();
@@ -48,8 +55,6 @@ public class FrontController {
     try {
       // 1. Вызываем accounts сервис
       ResponseEntity<User> response = restTemplate.getForEntity(
-//              "http://localhost:8082/api/users/{id}",
-//              "http://localhost:8080/accounts/api/users/{id}",
               "http://gateway/accounts/api/users/{id}",
               User.class,
               id
@@ -97,7 +102,6 @@ public class FrontController {
         model.addAttribute("users", otherUsers);
       }
 
-
       return "main.html";
 
       } catch (Exception e) {
@@ -108,6 +112,88 @@ public class FrontController {
 
     return "main.html";
   }
+*/
+
+
+
+
+
+
+
+
+  @GetMapping("/{id}")
+  public String getUserProfile(@PathVariable Long id,
+                               Model model,
+                               HttpServletRequest request) {
+
+    HttpEntity<String> entity = createAuthEntity(request);
+
+    User currentUser = new User();
+    String errorMessage = "";
+    try {
+      // 1. Вызываем accounts сервис
+      ResponseEntity<User> response = restTemplate.exchange(
+              "http://gateway/accounts/api/users/{id}",
+              HttpMethod.GET,
+              entity,
+              User.class,
+              id
+      );
+
+
+      if (response.getStatusCode() == HttpStatus.OK && response.hasBody()) {
+        currentUser = response.getBody();
+
+        model.addAttribute("login", currentUser.getLogin());
+        model.addAttribute("name", currentUser.getName());
+        model.addAttribute("birthdate", currentUser.getBirthday()); // !! bithdate birthday
+        System.out.println( "user birthday " + currentUser.getBirthday());
+
+      }
+
+      // 2. Вызываем currency сервис для списка валют
+      ResponseEntity<List<ExchangeRateDto>> currencyResponse = restTemplate.exchange(
+//          "http://127.0.0.1:8083/api/rates",
+              "http://gateway/exchange/api/rates",
+              HttpMethod.GET,
+              null,
+              new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
+      );
+      if ( currencyResponse.getStatusCode() == HttpStatus.OK && currencyResponse.hasBody()) {
+        List<ExchangeRateDto> rates = currencyResponse.getBody();
+        List<Currency4html> currencies = rates.stream()
+                .map(rate -> new Currency4html(rate.getName(), rate.getTitle()))
+                .collect(Collectors.toList());
+        model.addAttribute("currency", currencies);
+      }
+
+      ResponseEntity<List<User>> allUsersResponse = restTemplate.exchange(
+              "http://gateway/accounts/api/users",
+              HttpMethod.GET,
+              entity,
+              new ParameterizedTypeReference<List<User>>() {}
+      );
+      if ( allUsersResponse.getStatusCode() == HttpStatus.OK && allUsersResponse.hasBody()) {
+        List<User> allUsers = allUsersResponse.getBody();
+        final long currentUserId = currentUser.getId();
+        List<User> otherUsers = allUsers.stream()
+                .filter(user -> !user.getId().equals(currentUserId) )
+                .collect(Collectors.toList());
+
+        model.addAttribute("users", otherUsers);
+      }
+
+      return "main.html";
+
+    } catch (Exception e) {
+      // Обработка ошибок
+      model.addAttribute("errors", "Err with accounts or exchange " + e.getMessage() );
+      System.out.println("error with accounts or exchange service");
+    }
+
+    return "main.html";
+  }
+
 
 
   @GetMapping("/signup")
@@ -151,7 +237,6 @@ public class FrontController {
 
       // Отправляем запрос в account service
       ResponseEntity<User> response = restTemplate.postForEntity(
-//              "http://localhost:8082/api/users",
               "http://gateway/accounts/api/users",
               user,
               User.class
@@ -178,15 +263,7 @@ public class FrontController {
   }
 
 
-  /*
-  @PostMapping("/user/{id}/editPassword")
-  public String postEditPassword(@PathVariable Long id,
-                                 @RequestParam String password,
-                                 Model model){
-    System.out.println("hello from editPassword method");
-    return "main.html";
-  }
-  */
+
 
   @PostMapping("/user/{id}/editPassword")
   public String postEditPassword(
@@ -194,8 +271,10 @@ public class FrontController {
           @RequestParam String password,
           @RequestParam String confirm_password,
           Model model,
-          RedirectAttributes redirectAttributes) {
+          RedirectAttributes redirectAttributes,
+          HttpServletRequest request) {
 
+    HttpEntity<String> entity = createAuthEntity(request);
     // Сохраняем все текущие атрибуты модели
     Map<String, Object> modelAttributes = model.asMap();
     modelAttributes.forEach(redirectAttributes::addFlashAttribute);
@@ -214,12 +293,19 @@ public class FrontController {
     }
 
     try {
+      /*
       restTemplate.postForObject(
-//              "http://localhost:8082/api/users/{id}/password?newPassword={password}",
               "http://gateway/accounts/api/users/{id}/password?newPassword={password}",
               null,
               Void.class,
               id, password
+      );  */
+      restTemplate.exchange(
+              "http://gateway/accounts/api/users/{id}/password?newPassword={password}",
+              HttpMethod.POST,
+              entity,
+              Void.class,
+              Map.of("id", id, "password", password)
       );
       redirectAttributes.addFlashAttribute("message", "Пароль успешно изменен!");
     } catch (Exception e) {
@@ -238,10 +324,11 @@ public class FrontController {
           @RequestParam String name,
           @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate,
           Model model,
-          RedirectAttributes redirectAttributes) {
+          RedirectAttributes redirectAttributes,
+          HttpServletRequest request) {
 
 
-    System.out.println("hi there!");
+    HttpEntity<String> entity = createAuthEntity(request);
     //validation
     if ( birthdate != null && birthdate.isAfter(LocalDate.now().minusYears(18))) {
       redirectAttributes.addFlashAttribute("errors", "Возраст должен быть не менее 18 лет");
@@ -263,13 +350,21 @@ public class FrontController {
     }
 
     try {
-      restTemplate.postForObject(
-//              "http://localhost:8082/api/users/{id}",
+/*      restTemplate.postForObject(
               "http://gateway/accounts/api/users/{id}",
               updates,
               Void.class,
               id
+      );*/
+      HttpEntity<Map<String, Object>> entityWithBody = new HttpEntity<>(updates, entity.getHeaders());  // как по мне так это полный пипец
+      restTemplate.exchange(
+              "http://gateway/accounts/api/users/{id}",
+              HttpMethod.POST,
+              entityWithBody,
+              Void.class,
+              Map.of("id", id)
       );
+
       redirectAttributes.addFlashAttribute("message", "Данные успешно обновлены!");
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute("errors",
@@ -277,6 +372,36 @@ public class FrontController {
     }
 
     return "redirect:/" + id ;
+  }
+
+
+
+
+  private String extractTokenFromRequest(HttpServletRequest request) {
+      Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if ("jwt_token".equals(cookie.getName())) {
+          return cookie.getValue();
+        }
+      }
+    }
+    String authHeader = request.getHeader("Authorization");
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7);
+    }
+    return null;
+  }
+
+  private HttpEntity<String> createAuthEntity(HttpServletRequest request) {
+    String token = extractTokenFromRequest(request);
+    HttpHeaders headers = new HttpHeaders();
+    if (token != null) {
+      headers.set("Authorization", "Bearer " + token);
+    } else {
+      System.out.println("createAuthEntity: token = null");
+    }
+    return new HttpEntity<>(headers);
   }
 
 

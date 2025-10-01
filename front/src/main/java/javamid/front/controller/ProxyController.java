@@ -2,6 +2,7 @@ package javamid.front.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javamid.front.model.Notification;
+import javamid.front.util.AuthUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 public class ProxyController {
-  RestTemplate restTemplate;
-  public ProxyController( RestTemplate restTemplate) { this.restTemplate = restTemplate; }
+  private final RestTemplate restTemplate;
+  private final AuthUtils authUtils;
+  public ProxyController( RestTemplate restTemplate,
+                          AuthUtils authUtils ) {
+    this.restTemplate = restTemplate;
+    this.authUtils = authUtils;
+  }
 
   @GetMapping( "/api/notifications/{userId}" )
   public ResponseEntity<?> getNotify(@PathVariable Long userId,

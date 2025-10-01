@@ -1,5 +1,7 @@
 package javamid.notify.controller;
 
+import javamid.notify.model.Notification;
+import javamid.notify.model.TransferDto;
 import javamid.notify.service.NotifyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,33 +21,22 @@ public class NotifyController {
                                     ) {
 
 
-    String mockString = """
-    [
-      {
-        "id": 1111,
-        "title": "Новое сообщение",
-        "message": "Вам пришло новое сообщение в чате",
-        "createdAt": "2023-10-25T14:30:00",
-        "read": false,
-        "type": "INFO"
-      },
-      {
-        "id": 2222,
-        "title": "Пополнение счета",
-        "message": "Ваш счет пополнен на 1000 RUB",
-        "createdAt": "2023-10-25T14:25:00",
-        "read": false,
-        "type": "SUCCESS"
-      }
-    ]
-    """;
-
 
     System.out.println( "checked: " + noteId );
 
-    return ResponseEntity.ok().body( mockString );
+    if( noteId != null) {
+      for( Long id: noteId )  notifyService.markAsRead(id);
+    }
+
+    List<Notification> result = notifyService.getNotesForUser( userId );
+    return ResponseEntity.ok().body( result );
 
 
+  }
 
+  @PostMapping("/transfer")
+  public ResponseEntity<?> postTransfer(@RequestBody TransferDto transferDto){
+    notifyService.saveTransferNote( transferDto );
+    return ResponseEntity.ok().build();
   }
 }

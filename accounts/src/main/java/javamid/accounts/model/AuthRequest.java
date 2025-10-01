@@ -1,4 +1,4 @@
-package javamid.auth.model;
+package javamid.accounts.model;
 
 public class AuthRequest {
   private String username;

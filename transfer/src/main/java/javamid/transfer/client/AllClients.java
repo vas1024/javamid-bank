@@ -3,6 +3,8 @@ package javamid.transfer.client;
 import javamid.transfer.model.ExchangeRateDto;
 import javamid.transfer.model.TransferDto;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -53,15 +56,30 @@ public class AllClients {
   }
 
 
-  public String transfer( TransferDto transferDto ){
+  public String transfer(TransferDto transferDto, String token){
+
+    HttpHeaders headers = new HttpHeaders();
+    if (token != null) {
+      headers.set("Authorization", "Bearer " + token);
+    }
+    HttpEntity<TransferDto> entity = new HttpEntity<>(transferDto, headers);
+
     String result = "";
     try {
-      result = restTemplate.postForObject(
+/*      result = restTemplate.postForObject(
               "http://gateway/accounts/api/users/{userId}/accounts/transfer",
               transferDto,
               String.class,
               transferDto.getUserIdFrom()
+      );*/
+      ResponseEntity<String> response = restTemplate.exchange(
+              "http://gateway/accounts/api/users/{userId}/accounts/transfer",
+              HttpMethod.POST,
+              entity,
+              String.class,
+              Map.of("userId", transferDto.getUserIdFrom() )
       );
+      result = response.getBody();
     } catch (Exception e) {
       result = "Error: " + e.getMessage();
     }
@@ -69,6 +87,21 @@ public class AllClients {
     return result;
   }
 
+
+  public String notify( TransferDto transferDto ){
+    String result = "";
+    try {
+      result = restTemplate.postForObject(
+              "http://gateway/notify/api/notifications/transfer",
+              transferDto,
+              String.class
+      );
+    } catch (Exception e) {
+      result = "Error: " + e.getMessage();
+    }
+
+    return result;
+  }
 
 
 

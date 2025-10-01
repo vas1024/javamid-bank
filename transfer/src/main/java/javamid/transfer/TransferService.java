@@ -21,7 +21,7 @@ public class TransferService {
   private final AllClients allClients;
   public TransferService(AllClients allClients){ this.allClients = allClients ; }
 
-  public String transfer( TransferDto transferDto ) {
+  public String transfer( TransferDto transferDto, String token ) {
 
 
     if (allClients.isTransferBlocked(transferDto)) return "Error: blocked";
@@ -63,7 +63,11 @@ public class TransferService {
     transferDto.setValueTo(valueTo);
 
     System.out.println( "TransferService: before accounts service:  " + transferDto );
-    String result = allClients.transfer(transferDto);
+    String result = allClients.transfer(transferDto, token);
+
+    if( ! result.startsWith("Error:")) {
+      allClients.notify(transferDto);
+    }
 
 
     return result;

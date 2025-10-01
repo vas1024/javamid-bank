@@ -94,6 +94,15 @@ setInterval(() => {
 <a href="/logout" style="float:right;">
     <b>ВЫЙТИ &cudarrr;</b>
 </a>
+<br>
+<a th:href="@{/user/{id}/delete(id=${id})}" style="float:right;">
+    <b>УДАЛИТЬ ПОЛЬЗОВАТЕЛЯ &cudarrr;</b>
+</a>
+
+
+
+
+
 <table style="width:70%;margin-left:auto;margin-right:auto;">
     <tr><td style="padding:2px;">
         <form method="post" th:action="${'/user/'+id+'/editPassword'}">

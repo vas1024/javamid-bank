@@ -1,4 +1,4 @@
-package javamid.front.model;
+package javamid.auth.model;
 
 public class ValidationResponse {
   private boolean valid;

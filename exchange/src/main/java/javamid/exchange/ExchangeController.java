@@ -51,22 +51,7 @@ import java.util.Map;
     }
 
 
-    /*
-    @GetMapping("/rates")
-    public Map<String, Double> getAllRates() {
-      return exchangeService.getAllRates();
-    }
-    */
 
-    @GetMapping("/{currency}")
-    public Double getRate(@PathVariable String currency) {
-      return exchangeService.getRate(currency);
-    }
-
-    @PostMapping("/{currency}")
-    public void updateRate(@PathVariable String currency, @RequestParam Double newRate) {
-      exchangeService.updateRate(currency, newRate);
-    }
 
     @PostMapping("/bulk")
     public void updateRatesBulk(@RequestBody List<ExchangeRateDto> currencyRates) {

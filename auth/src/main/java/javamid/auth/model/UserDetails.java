@@ -1,4 +1,4 @@
-package javamid.front.model;
+package javamid.auth.model;
 
 public class UserDetails {
   private Long userId;
