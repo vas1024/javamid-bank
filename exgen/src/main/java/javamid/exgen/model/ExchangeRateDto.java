@@ -1,4 +1,4 @@
-package javamid.exgen;
+package javamid.exgen.model;
 
 public class ExchangeRateDto {
   private String title;

@@ -1,5 +1,6 @@
-package javamid.exgen;
+package javamid.exgen.scheduler;
 
+import javamid.exgen.controller.ExgenController;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,11 @@ public class ExgenScheduler {
   }
 
 
-  @Scheduled(fixedRate = 1000)
+  @Scheduled(fixedRate = 10000)
   public void updateCurrencyRates() {
     try{
       var rates = exgenController.getRates();
+      System.out.println( "получили курсы "  + rates );
       var modRates =  exgenController.modifyRates(rates);
       exgenController.sendRates(modRates);
 

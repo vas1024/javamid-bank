@@ -1,14 +1,10 @@
 package javamid.auth.model;
 
-import jakarta.persistence.*;
 
 
-@Entity
-@Table(name = "users")
 public class Notification {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+
   private Long id;
   private Long userId;
   private String message;
