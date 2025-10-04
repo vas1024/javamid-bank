@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="accounts" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="javamid.accounts.AccountsApplication" />
+    <module name="accounts" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

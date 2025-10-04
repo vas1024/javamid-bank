@@ -74,3 +74,13 @@ Dynamic Discovery
 например  "http://gateway/accounts/api/users/{id}/password?newPassword={password}"
 
 
+
+базы данных
+
+имеются у auth, accounts, notify
+это H2 базы в файле
+они лежат в домашней директории ~/IdeaProjects/javamid-bank/data
+можно переопределить 
+VM options: -DDB_PATH=./data
+Environment variable: DB_PATH=./data
+

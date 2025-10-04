@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="auth" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="javamid.auth.AuthApplication" />
+    <module name="auth" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

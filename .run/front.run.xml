@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="front" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="javamid.front.FrontApplication" />
+    <module name="front" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

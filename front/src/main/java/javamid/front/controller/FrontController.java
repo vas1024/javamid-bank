@@ -205,7 +205,7 @@ public class FrontController {
   public String processSignup(
           @RequestParam String login,
           @RequestParam String password,
-          @RequestParam String confirm_password,
+          @RequestParam("confirm_password") String confirmPassword,
           @RequestParam String name,
           @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate,
           Model model) {
@@ -214,7 +214,7 @@ public class FrontController {
     List<String> errors = new ArrayList<>();
 
     // Валидация
-    if (!password.equals(confirm_password)) {
+    if (!password.equals(confirmPassword)) {
       errors.add("Пароли не совпадают");
     }
 

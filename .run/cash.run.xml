@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cash" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="javamid.cash.CashApplication" />
+    <module name="cash" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

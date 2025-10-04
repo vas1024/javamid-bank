@@ -32,6 +32,14 @@ public class ClientSetupService {
       System.out.println("Created exgen client");
     } else {
       System.out.println("exgen client already exists");
+      RegisteredClient existingClient = clientRepository.findByClientId("exgen");
+      System.out.println("=== EXISTING EXGEN CLIENT DETAILS ===");
+      System.out.println("Client ID: " + existingClient.getClientId());
+      System.out.println("Scopes: " + existingClient.getScopes());
+      System.out.println("Grant Types: " + existingClient.getAuthorizationGrantTypes());
+      System.out.println("Auth Methods: " + existingClient.getClientAuthenticationMethods());
+      System.out.println("Client Secret: [PROTECTED]");
+      System.out.println("=====================================");
     }
   }
 

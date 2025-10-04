@@ -1,0 +1,6 @@
+#FileLock
+#Sun Oct 05 00:36:30 MSK 2025
+hostName=i5nuc
+id=199b127a6fc529e9bd5993d53f817d542783ecfcc10
+method=file
+server=172.18.0.1\:62983
