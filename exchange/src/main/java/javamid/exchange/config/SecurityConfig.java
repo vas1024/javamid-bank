@@ -17,6 +17,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/rates").permitAll()           // 🔓 Public access
                     .requestMatchers("/api/bulk").hasAuthority("SCOPE_write") // 🔐 Protected
+                    .requestMatchers("/actuator/**").permitAll()
                     .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

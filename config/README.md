@@ -73,6 +73,11 @@ Dynamic Discovery
 запросы имеют вид http://gateway/<имя микросервиса>/<путь на сервисе>
 например  "http://gateway/accounts/api/users/{id}/password?newPassword={password}"
 
+в докере микросервисам надо первоначально найти сервер с eurika. для этого используется докер dns и свойство спринга подставлять 
+environment variable в файлы application.properties: 
+deureka.client.serviceUrl.defaultZone=${EUREKA_URL:http://localhost:8761/eureka}
+и для каждого мс надо определить EUREKA_URL=http://eureka:8761/eureka в докер-композ
+
 
 
 базы данных
@@ -84,3 +89,51 @@ Dynamic Discovery
 VM options: -DDB_PATH=./data
 Environment variable: DB_PATH=./data
 
+
+сборка докера
+
+в каждом модуле есть свой Dockerfile с правильным портом для микросервиса.
+надо зпустить построение джарников
+mvn clean package -DskipTests
+затем из корня проекта запустить
+docker build -t bank/accounts:1.0.0 ./accounts
+docker build -t bank/auth:1.0.0 ./auth
+docker build -t bank/blocker:1.0.0 ./blocker
+docker build -t bank/cash:1.0.0 ./cash
+docker build -t bank/config:1.0.0 ./config
+docker build -t bank/eureka:1.0.0 ./eureka
+docker build -t bank/exchange:1.0.0 ./exchange
+docker build -t bank/exgen:1.0.0 ./exgen
+docker build -t bank/front:1.0.0 ./front
+docker build -t bank/gateway:1.0.0 ./gateway
+docker build -t bank/notify:1.0.0 ./notify
+docker build -t bank/transfer:1.0.0 ./transfer
+затем стартовать весь проект с помощью docker-compose
+docker-compose -f docker-compose-test.yml up
+
+
+
+
+
+памятка по портам
+accounts    8082
+auth        9000
+blocker     8087
+cash        8085
+config      8888
+eureka      8761
+exchange    8083
+exgen       8084
+front       8081
+gateway     8080
+notify      8088
+transfer    8086
+
+
+
+
+недоделки
+
+- не сделал Hysterix ( ретраи запросов и фолбеки )
+- нет тестов
+- 

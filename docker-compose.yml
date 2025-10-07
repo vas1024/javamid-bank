@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  # Config Server (должен запускаться первым)
+  config:
+    build: ./config
+    ports:
+      - "8888:8888"
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Service Discovery
+  eureka:
+    build: ./eureka
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Бизнес-сервисы
+  auth:
+    build: ./auth
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  accounts:
+    build: ./accounts
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  blocker:
+    build: ./blocker
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  cash:
+    build: ./cash
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  exchange:
+    build: ./exchange
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  exgen:
+    build: ./exgen
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  notify:
+    build: ./notify
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  transfer:
+    build: ./transfer
+    depends_on:
+      - eureka
+      - config
+    networks:
+      - bank-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Frontend
+  front:
+    build: ./front
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks:
+      - bank-network
+
+networks:
+  bank-network:
+    driver: bridge
