@@ -8,7 +8,8 @@
 но это ничего, так как, когда еврика поднимется, конфиг обновит в ней свою регистрацию.
 последующие сервисы будут получать в еврике адрес и порт конфиг сервера, читать на нем свою конфигурацию ( свой порт ),
 стартовать и регистрировать себя в еврике.
-третьим - auth
+третьим - gateway
+четвертым - auth
 важно, чтобы сервис auth был бы зарегистрирован в eureka на момент старта сервисов, 
 которые его динамически находят в коде - exchange, exgen
 
@@ -108,7 +109,7 @@ docker build -t bank/front:1.0.0 ./front
 docker build -t bank/gateway:1.0.0 ./gateway
 docker build -t bank/notify:1.0.0 ./notify
 docker build -t bank/transfer:1.0.0 ./transfer
-затем стартовать весь проект с помощью docker-compose
+затем стартовать весь проект с помощью docker-compose 
 docker-compose -f docker-compose-test.yml up
 
 
