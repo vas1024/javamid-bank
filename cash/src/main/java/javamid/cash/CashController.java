@@ -29,34 +29,16 @@ public class CashController {
     // call blocker
     System.out.println("CashController: postWithdrawal: cashDto: id value currency " + cashDto.getUserId() + cashDto.getCurrency() + cashDto.getValue() );
 
-    // 🔽 ИЗВЛЕКАЕМ ТОКЕН ИЗ ВХОДЯЩЕГО ЗАПРОСА
-    String token = extractTokenFromRequest(request);
-    // 🔽 СОЗДАЕМ HEADERS С ТОКЕНОМ
-    HttpHeaders headers = new HttpHeaders();
-    if (token != null) {
-      headers.set("Authorization", "Bearer " + token);
-    }
-    // 🔽 СОЗДАЕМ ENTITY С ТЕЛОМ (cashDto) И HEADERS
-    HttpEntity<CashDto> entity = new HttpEntity<>(cashDto, headers);
-
 
     String result = "";
     try {
-/*      result = restTemplate.postForObject(
+      result = restTemplate.postForObject(
               "http://gateway/accounts/api/users/{userId}/accounts/withdrawal",
               cashDto,
               String.class,
               cashDto.getUserId()
-      );*/
-
-      ResponseEntity<String> response = restTemplate.exchange(
-              "http://gateway/accounts/api/users/{userId}/accounts/withdrawal",
-              HttpMethod.POST,
-              entity,
-              String.class,
-              Map.of("userId", cashDto.getUserId())
       );
-      result = response.getBody();
+
 
     } catch (Exception e) {
       result = "Error: " + e.getMessage();
@@ -68,8 +50,7 @@ public class CashController {
   }
 
 
-
-
+  
 
   @PostMapping("/deposit")
   public ResponseEntity<?> postDeposit( @RequestBody CashDto cashDto,
@@ -77,33 +58,17 @@ public class CashController {
 
     //call blocker
 
-    // 🔽 ИЗВЛЕКАЕМ ТОКЕН ИЗ ВХОДЯЩЕГО ЗАПРОСА
-    String token = extractTokenFromRequest(request);
-    // 🔽 СОЗДАЕМ HEADERS С ТОКЕНОМ
-    HttpHeaders headers = new HttpHeaders();
-    if (token != null) {
-      headers.set("Authorization", "Bearer " + token);
-    }
-    // 🔽 СОЗДАЕМ ENTITY С ТЕЛОМ (cashDto) И HEADERS
-    HttpEntity<CashDto> entity = new HttpEntity<>(cashDto, headers);
 
     System.out.println("CashController: postDeposit: cashDto: id value currency " + cashDto.getUserId() + cashDto.getCurrency() + cashDto.getValue() );
     String result = "";
     try {
-/*       result = restTemplate.postForObject(
+       result = restTemplate.postForObject(
             "http://gateway/accounts/api/users/{userId}/accounts/deposit",
             cashDto,
             String.class,
             cashDto.getUserId()
-       );*/
-      ResponseEntity<String> response = restTemplate.exchange(
-              "http://gateway/accounts/api/users/{userId}/accounts/deposit",
-              HttpMethod.POST,
-              entity,
-              String.class,
-              Map.of("userId", cashDto.getUserId())
-      );
-      result = response.getBody();
+       );
+
 
     } catch (Exception e) {
       result = result + "Error: " + e.getMessage();
@@ -112,23 +77,6 @@ public class CashController {
     //call notify
 
     return ResponseEntity.ok().body(result);
-  }
-
-
-  private String extractTokenFromRequest(HttpServletRequest request) {
-    Cookie[] cookies = request.getCookies();
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if ("jwt_token".equals(cookie.getName())) {
-          return cookie.getValue();
-        }
-      }
-    }
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      return authHeader.substring(7);
-    }
-    return null;
   }
 
 

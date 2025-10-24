@@ -34,3 +34,4 @@ build/
 
 ### H2 database ###
 *.mv.db
+*.lock.db
