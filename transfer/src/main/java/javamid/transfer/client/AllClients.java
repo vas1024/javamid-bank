@@ -56,22 +56,18 @@ public class AllClients {
   }
 
 
-  public String transfer(TransferDto transferDto, String token){
-
-    HttpHeaders headers = new HttpHeaders();
-    if (token != null) {
-      headers.set("Authorization", "Bearer " + token);
-    }
-    HttpEntity<TransferDto> entity = new HttpEntity<>(transferDto, headers);
+  public String transfer(TransferDto transferDto ){
 
     String result = "";
     try {
-/*      result = restTemplate.postForObject(
+      result = restTemplate.postForObject(
               "http://gateway/accounts/api/users/{userId}/accounts/transfer",
               transferDto,
               String.class,
               transferDto.getUserIdFrom()
-      );*/
+      );
+
+      /*
       ResponseEntity<String> response = restTemplate.exchange(
               "http://gateway/accounts/api/users/{userId}/accounts/transfer",
               HttpMethod.POST,
@@ -80,6 +76,7 @@ public class AllClients {
               Map.of("userId", transferDto.getUserIdFrom() )
       );
       result = response.getBody();
+*/
     } catch (Exception e) {
       result = "Error: " + e.getMessage();
     }

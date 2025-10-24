@@ -5,12 +5,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
+
 @Configuration
 public class RestTemplateConfig {
+
+  private final TokenInterceptor tokenInterceptor;
+
+  public RestTemplateConfig(TokenInterceptor tokenInterceptor) {
+    this.tokenInterceptor = tokenInterceptor;
+  }
 
   @Bean
   @LoadBalanced
   public RestTemplate restTemplate() {
-    return new RestTemplate();
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setInterceptors(Collections.singletonList(tokenInterceptor));
+    return restTemplate;
   }
 }

@@ -2,7 +2,6 @@ package javamid.transfer;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javamid.transfer.model.TransferDto;
-import javamid.transfer.util.AuthUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +14,9 @@ import org.springframework.web.client.RestTemplate;
 public class TransferController {
 
   private final TransferService transferService;
-  private final AuthUtils authUtils;
-  public TransferController(TransferService transferService,
-                            AuthUtils authUtils ){
+    public TransferController(TransferService transferService
+                             ){
     this.transferService = transferService ;
-    this.authUtils = authUtils;
   }
 
 
@@ -29,10 +26,7 @@ public class TransferController {
 
     System.out.println("TransferController: postTransfer: transferDto: valueFrom To " + transferDto.getValueFrom() + " " + transferDto.getValueTo());
 
-
-    String token = authUtils.extractTokenFromRequest(request);
-
-    String result = transferService.transfer(transferDto, token);
+    String result = transferService.transfer(transferDto);
 
     return ResponseEntity.ok().body(result);
 
