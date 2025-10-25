@@ -1,6 +1,6 @@
 apiVersion: v2
 name: accounts
-description: Bank Account Service
+description: javamid-bank
 type: application
 version: 0.1.0
 appVersion: "1.0"

@@ -1,6 +1,6 @@
 # Docker image
 image:
-  repository: account-service
+  repository: accounts
   tag: latest
   pullPolicy: IfNotPresent
 
