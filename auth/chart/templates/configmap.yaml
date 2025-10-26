@@ -20,7 +20,9 @@ data:
     # schema.sql
     spring.sql.init.mode=always
     spring.sql.init.schema-locations=classpath:schema.sql
-    
+    spring.jpa.defer-datasource-initialization=true
+    spring.jpa.hibernate.ddl-auto=create-drop
+
     # JWT Configuration
     jwt.secret=${JWT_SECRET:default-secret}
     jwt.expiration={{ .Values.config.jwt.expiration }}
