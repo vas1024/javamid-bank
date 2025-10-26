@@ -19,7 +19,7 @@ data:
 
     # schema.sql
     spring.sql.init.mode=always
-#    spring.sql.init.schema-locations=classpath:schema.sql
+    #    spring.sql.init.schema-locations=classpath:schema.sql
     spring.sql.init.schema-locations=classpath:/BOOT-INF/classes/schema.sql
     spring.jpa.defer-datasource-initialization=true
     spring.jpa.hibernate.ddl-auto=create-drop
