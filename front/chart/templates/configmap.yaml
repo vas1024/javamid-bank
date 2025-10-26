@@ -7,15 +7,5 @@ data:
     server.port={{ .Values.config.serverPort }}
     spring.application.name={{ .Chart.Name }}
     
-    # Database
-    spring.datasource.url={{ .Values.config.database.url }}
-    spring.datasource.driver-class-name={{ .Values.config.database.driver }}
-    spring.datasource.username={{ .Values.config.database.username }}
-    spring.datasource.password={{ .Values.config.database.password }}
-    
-    # JPA
-    spring.jpa.hibernate.ddl-auto={{ .Values.config.jpa.ddlAuto }}
-    spring.jpa.show-sql={{ .Values.config.jpa.showSql }}
-    
     # Logging
     logging.level.com.bank.account={{ .Values.config.logging.level }}
