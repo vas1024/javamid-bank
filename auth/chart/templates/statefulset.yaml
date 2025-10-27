@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Chart.Name }}
   labels:
     app: {{ .Chart.Name }}
 spec:
+  serviceName: {{ .Chart.Name }}  
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -23,10 +24,25 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
+        - name: data-volume
+          mountPath: /data  
         env:
         - name: SPRING_CONFIG_LOCATION
           value: file:/app/config/application.properties
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: jwt-secret
       volumes:
       - name: config-volume
         configMap:
           name: {{ .Chart.Name }}-config
+  volumeClaimTemplates:  
+  - metadata:
+      name: data-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Mi

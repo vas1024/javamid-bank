@@ -13,7 +13,7 @@ service:
 config:
   serverPort: 8080
   database:
-    url: "jdbc:h2:file:./data/h2.accounts;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"
+    url: "jdbc:h2:file:/data/H2.accounts;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"
     driver: "org.h2.Driver"
     username: "sa"
     password: ""
