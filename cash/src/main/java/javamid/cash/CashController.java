@@ -33,7 +33,8 @@ public class CashController {
     String result = "";
     try {
       result = restTemplate.postForObject(
-              "http://gateway/accounts/api/users/{userId}/accounts/withdrawal",
+//              "http://gateway/accounts/api/users/{userId}/accounts/withdrawal",
+              "http://accounts:8080/api/users/{userId}/accounts/withdrawal",
               cashDto,
               String.class,
               cashDto.getUserId()
@@ -63,7 +64,8 @@ public class CashController {
     String result = "";
     try {
        result = restTemplate.postForObject(
-            "http://gateway/accounts/api/users/{userId}/accounts/deposit",
+//            "http://gateway/accounts/api/users/{userId}/accounts/deposit",
+            "http://accounts:8080/api/users/{userId}/accounts/deposit",
             cashDto,
             String.class,
             cashDto.getUserId()

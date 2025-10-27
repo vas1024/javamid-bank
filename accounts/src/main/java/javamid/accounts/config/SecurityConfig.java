@@ -192,7 +192,8 @@ public class SecurityConfig {
     private boolean validateTokenWithAuthService(String token) {
       try {
         Boolean isValid = restTemplate.postForObject(
-                "http://gateway/auth/api/validate",
+//                "http://gateway/auth/api/validate",
+                "http://auth:8080/api/validate",
                 token,
                 Boolean.class
         );

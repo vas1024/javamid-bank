@@ -24,7 +24,8 @@ public class AllClients {
 
     // Используем ParameterizedTypeReference для работы с List<>
     ResponseEntity<List<ExchangeRateDto>> response = restTemplate.exchange(
-            "http://gateway/exchange/api/rates",
+//            "http://gateway/exchange/api/rates",
+            "http://exchange:8080/api/rates",
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
@@ -42,7 +43,8 @@ public class AllClients {
     String blockResult = "";
     try {
       blockResult = restTemplate.postForObject(
-              "http://gateway/blocker/api/transfer",
+//              "http://gateway/blocker/api/transfer",
+              "http://blocker:8080/api/transfer",
               transferDto,
               String.class
       );
@@ -61,7 +63,8 @@ public class AllClients {
     String result = "";
     try {
       result = restTemplate.postForObject(
-              "http://gateway/accounts/api/users/{userId}/accounts/transfer",
+//              "http://gateway/accounts/api/users/{userId}/accounts/transfer",
+              "http://accounts:8080/api/users/{userId}/accounts/transfer",
               transferDto,
               String.class,
               transferDto.getUserIdFrom()
@@ -89,7 +92,8 @@ public class AllClients {
     String result = "";
     try {
       result = restTemplate.postForObject(
-              "http://gateway/notify/api/notifications/transfer",
+//              "http://gateway/notify/api/notifications/transfer",
+              "http://notify:8080/api/notifications/transfer",
               transferDto,
               String.class
       );
