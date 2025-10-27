@@ -1,0 +1,36 @@
+apiVersion: v2
+name: bank
+description: Bank Microservices System
+type: application
+version: 0.1.0
+appVersion: "1.0"
+
+dependencies:
+  - name: accounts
+    version: "0.1.0"
+    repository: "file://../accounts/chart" 
+  - name: auth
+    version: "0.1.0" 
+    repository: "file://../auth/chart"
+  - name: blocker
+    version: "0.1.0"
+    repository: "file://../blocker/chart"
+  - name: cash
+    version: "0.1.0" 
+    repository: "file://../cash/chart"
+  - name: front
+    version: "0.1.0"
+    repository: "file://../front/chart"
+  - name: exchange
+    version: "0.1.0"
+    repository: "file://../exchange/chart"
+  - name: excgen
+    version: "0.1.0"
+    repository: "file://../excgen/chart"
+  - name: notify
+    version: "0.1.0" 
+    repository: "file://../notify/chart"
+  - name: transfer
+    version: "0.1.0" 
+    repository: "file://../transfer/chart"
+
