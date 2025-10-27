@@ -32,7 +32,8 @@ public class ProxyController {
                                      HttpServletRequest request ) {
 
     try {
-      String targetUrl = "http://gateway/notify/api/notifications/" + userId;
+//      String targetUrl = "http://gateway/notify/api/notifications/" + userId;
+      String targetUrl = "http://notify:8080/api/notifications/" + userId;
       String queryString = request.getQueryString();
       if (queryString != null) {
         targetUrl += "?" + queryString;
@@ -53,7 +54,8 @@ public class ProxyController {
     public List<ExchangeRateDto> getExchangeRates(HttpServletRequest request ) {
 
       try {
-        String targetUrl = "http://gateway/exchange/api/rates";
+//        String targetUrl = "http://gateway/exchange/api/rates";
+        String targetUrl = "http://exchange:8080/api/rates";
 
         List<ExchangeRateDto> rates = restTemplate.getForObject(
                 targetUrl,

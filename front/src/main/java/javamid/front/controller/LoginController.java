@@ -55,7 +55,8 @@ public class LoginController {
     try {
       // Вызываем Auth Service для получения JWT
       ResponseEntity<AuthResponse> authResponse = restTemplate.postForEntity(
-              "http://gateway/auth/api/login",
+//              "http://gateway/auth/api/login",
+              "http://auth:8080/api/login",
               new AuthRequest(username, password),
               AuthResponse.class
       );
@@ -124,7 +125,8 @@ public class LoginController {
                Void.class
       );*/
       restTemplate.exchange(
-              "http://gateway/accounts/api/users/{id}",
+//              "http://gateway/accounts/api/users/{id}",
+              "http://accounts:8080/api/users/{id}",
               HttpMethod.DELETE,
               entity,
               Void.class,

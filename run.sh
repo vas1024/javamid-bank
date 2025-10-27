@@ -13,4 +13,5 @@ mvn clean package -DskipTest
 docker build -t $SERVICE_NAME:latest .
 kind load docker-image $SERVICE_NAME:latest
 helm upgrade --install $SERVICE_NAME ./chart
+kubectl rollout restart deployment/$SERVICE_NAME
 cd ..

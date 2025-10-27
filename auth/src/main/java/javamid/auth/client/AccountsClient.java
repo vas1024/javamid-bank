@@ -14,7 +14,8 @@ public class AccountsClient {
     Long result = 01L;
     try {
       result = restTemplate.postForObject(
-              "http://gateway/accounts/api/users/login",
+//              "http://gateway/accounts/api/users/login",
+              "http://accounts:8080/api/users/login",
               authRequest,
               Long.class
       );

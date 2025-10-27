@@ -133,7 +133,8 @@ public class FrontController {
     try {
       // 1. Вызываем accounts сервис
       ResponseEntity<User> response = restTemplate.exchange(
-              "http://gateway/accounts/api/users/{id}",
+//              "http://gateway/accounts/api/users/{id}",
+              "http://accounts:8080/api/users/{id}",
               HttpMethod.GET,
               entity,
               User.class,
@@ -154,7 +155,8 @@ public class FrontController {
       // 2. Вызываем currency сервис для списка валют
       ResponseEntity<List<ExchangeRateDto>> currencyResponse = restTemplate.exchange(
 //          "http://127.0.0.1:8083/api/rates",
-              "http://gateway/exchange/api/rates",
+//              "http://gateway/exchange/api/rates",
+              "http://exchange:8080/api/rates",
               HttpMethod.GET,
               null,
               new ParameterizedTypeReference<List<ExchangeRateDto>>() {}
@@ -168,7 +170,8 @@ public class FrontController {
       }
 
       ResponseEntity<List<User>> allUsersResponse = restTemplate.exchange(
-              "http://gateway/accounts/api/users",
+//              "http://gateway/accounts/api/users",
+              "http://accounts:8080/api/users",
               HttpMethod.GET,
               entity,
               new ParameterizedTypeReference<List<User>>() {}
@@ -302,7 +305,8 @@ public class FrontController {
               id, password
       );  */
       restTemplate.exchange(
-              "http://gateway/accounts/api/users/{id}/password?newPassword={password}",
+//              "http://gateway/accounts/api/users/{id}/password?newPassword={password}",
+              "http://accounts:8080/api/users/{id}/password?newPassword={password}",
               HttpMethod.POST,
               entity,
               Void.class,
@@ -359,7 +363,8 @@ public class FrontController {
       );*/
       HttpEntity<Map<String, Object>> entityWithBody = new HttpEntity<>(updates, entity.getHeaders());  // как по мне так это полный пипец
       restTemplate.exchange(
-              "http://gateway/accounts/api/users/{id}",
+//              "http://gateway/accounts/api/users/{id}",
+              "http://accounts:8080/api/users/{id}",
               HttpMethod.POST,
               entityWithBody,
               Void.class,

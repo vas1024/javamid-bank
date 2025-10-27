@@ -52,7 +52,8 @@ public class CashController {
                 cashDto.getUserId()
         );*/
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://gateway/cash/api/deposit",
+//                "http://gateway/cash/api/deposit",
+                "http://cash:8080/api/deposit",
                 HttpMethod.POST,
                 entity,
                 String.class,
@@ -86,7 +87,8 @@ public class CashController {
                 cashDto.getUserId()
         );*/
         ResponseEntity<String> response = restTemplate.exchange(
-                "http://gateway/cash/api/withdrawal",
+//                "http://gateway/cash/api/withdrawal",
+                "http://cash:8080/api/withdrawal",
                 HttpMethod.POST,
                 entity,
                 String.class,

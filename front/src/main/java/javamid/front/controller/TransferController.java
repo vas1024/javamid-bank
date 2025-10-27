@@ -72,7 +72,8 @@ public class TransferController {
       );*/
 
       ResponseEntity<String> response = restTemplate.exchange(
-              "http://gateway/transfer/api/transfer",
+//              "http://gateway/transfer/api/transfer",
+              "http://transfer:8080/api/transfer",
               HttpMethod.POST,
               entity,
               String.class
