@@ -36,7 +36,8 @@ public class ExgenController {
     try {
       // Используем ParameterizedTypeReference для работы с List<>
       ResponseEntity<List<ExchangeRateDto>> response = plainRestTemplate.exchange(
-              "http://gateway/exchange/api/rates",
+//              "http://gateway/exchange/api/rates",
+              "http://exchange:8080/api/rates",
               HttpMethod.GET,
               null,
               new ParameterizedTypeReference<List<ExchangeRateDto>>() {
@@ -101,7 +102,8 @@ public class ExgenController {
 
     try {
       ResponseEntity<Void> response = plainRestTemplate.exchange(
-              "http://gateway/exchange/api/bulk",
+//              "http://gateway/exchange/api/bulk",
+              "http://exchange:8080/api/bulk",
               HttpMethod.POST,
               entity,
               Void.class

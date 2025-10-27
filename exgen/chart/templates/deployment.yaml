@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.config.serverPort }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        env:
+        - name: SPRING_CONFIG_LOCATION
+          value: file:/app/config/application.properties
+
+        - name: OAUTH2_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: exgen-oauth-secret
+              key: client-id
+        - name: OAUTH2_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: exgen-oauth-secret
+              key: client-secret
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ .Chart.Name }}-config

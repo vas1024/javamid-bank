@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+data:
+  application.properties: |
+    server.port={{ .Values.config.serverPort }}
+    spring.application.name={{ .Chart.Name }}
+
+    spring.security.oauth2.client.registration.exgen.client-id=${OAUTH2_CLIENT_ID}
+    spring.security.oauth2.client.registration.exgen.client-secret=${OAUTH2_CLIENT_SECRET}
+    spring.security.oauth2.client.registration.exgen.authorization-grant-type=client_credentials
+    spring.security.oauth2.client.registration.exgen.scope=write
+    spring.security.oauth2.client.provider.auth.token-uri=http://auth:8080/oauth2/token
+
+    
+    # Logging
+    # logging.level.com.bank.account={{ .Values.config.logging.level }}

@@ -1,0 +1,24 @@
+# Docker image
+image:
+  repository: {{ .Chart.Name }} 
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Service
+service:
+  type: ClusterIP
+  port: 8080
+
+# Configuration
+config:
+  serverPort: 8080
+  logging:
+    level: "DEBUG"
+
+oauth2:
+  client:
+    id: "exgen"           
+    secret: "exgenPassword"
+
+# Deployment
+replicaCount: 1
