@@ -24,7 +24,7 @@ dependencies:
   - name: exchange
     version: "0.1.0"
     repository: "file://../exchange/chart"
-  - name: excgen
+  - name: exgen
     version: "0.1.0"
     repository: "file://../exgen/chart"
   - name: notify
