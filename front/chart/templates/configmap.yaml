@@ -8,4 +8,4 @@ data:
     spring.application.name={{ .Chart.Name }}
     
     # Logging
-    logging.level.com.bank.account={{ .Values.config.logging.level }}
+    # logging.level.com.bank.account={{ .Values.config.logging.level }}
