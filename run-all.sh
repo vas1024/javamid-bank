@@ -12,5 +12,5 @@ for SERVICE in "${SERVICES[@]}"; do
 done
 
 # Деплой umbrella
-helm dependency update
-helm upgrade --install bank .
+helm dependency update ./chart
+helm upgrade --install bank ./chart

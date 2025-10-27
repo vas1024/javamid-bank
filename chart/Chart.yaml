@@ -26,7 +26,7 @@ dependencies:
     repository: "file://../exchange/chart"
   - name: excgen
     version: "0.1.0"
-    repository: "file://../excgen/chart"
+    repository: "file://../exgen/chart"
   - name: notify
     version: "0.1.0" 
     repository: "file://../notify/chart"

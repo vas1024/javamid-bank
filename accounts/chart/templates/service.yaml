@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Chart.Name }}
 spec:
-  type: {{ .Values.service.type }}
+  clusterIP: None
   ports:
   - port: {{ .Values.service.port }}
     targetPort: {{ .Values.config.serverPort }}

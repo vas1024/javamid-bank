@@ -1,10 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Chart.Name }}
-  labels:
-    app: {{ .Chart.Name }}
 spec:
+  serviceName: {{ .Chart.Name }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -17,12 +16,13 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.config.serverPort }}
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
+        - name: data-volume
+          mountPath: /data
         env:
         - name: SPRING_CONFIG_LOCATION
           value: file:/app/config/application.properties
@@ -30,3 +30,11 @@ spec:
       - name: config-volume
         configMap:
           name: {{ .Chart.Name }}-config
+  volumeClaimTemplates:  
+  - metadata:
+      name: data-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 200Mi
