@@ -20,6 +20,7 @@ public class BlockerController {
     String result;
     if( random.nextInt(10) < 3 ) result = "BLOCKED";
     else result = "PASSED";
+    System.out.println(result);
     return ResponseEntity.ok().body(result);
   }
 
