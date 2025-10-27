@@ -1,6 +1,6 @@
 # Docker image
 image:
-  repository: {{ .Chart.Name }} 
+  repository: exgen
   tag: latest
   pullPolicy: IfNotPresent
 
