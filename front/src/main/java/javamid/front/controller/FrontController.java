@@ -237,7 +237,8 @@ public class FrontController {
 
       // Отправляем запрос в account service
       ResponseEntity<User> response = restTemplate.postForEntity(
-              "http://gateway/accounts/api/users",
+//              "http://gateway/accounts/api/users",
+              "http://accounts:8080/api/users",
               user,
               User.class
       );

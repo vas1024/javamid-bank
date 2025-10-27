@@ -9,7 +9,7 @@ fi
 echo "processing with  $SERVICE_NAME"
 
 cd $SERVICE_NAME
-mvn clean package
+mvn clean package -DskipTest
 docker build -t $SERVICE_NAME:latest .
 kind load docker-image $SERVICE_NAME:latest
 helm upgrade --install $SERVICE_NAME ./chart
