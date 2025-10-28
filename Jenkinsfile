@@ -11,13 +11,9 @@ pipeline {
                 script {
                     echo "?? Starting service discovery..."
                     
-                    // Сначала посмотрим структуру проекта
-                    sh 'ls -la'
-                    sh 'find . -maxdepth 2 -type d | sort'
-                    
-                    // Простой способ найти сервисы - через shell
+                    // Ищем сервисы - только в подпапках, исключая корневой pom.xml
                     def servicesOutput = sh(
-                        script: 'find . -name "pom.xml" -type f | sed \'s|./||\' | cut -d/ -f1 | sort | uniq | tr \'\\n\' \',\'',
+                        script: 'find . -mindepth 2 -name "pom.xml" -type f | grep -v "^./pom.xml" | sed \'s|./||\' | cut -d/ -f1 | sort | uniq | tr \'\\n\' \',\'',
                         returnStdout: true
                     ).trim()
                     
@@ -52,12 +48,8 @@ pipeline {
                             echo "Validating ${service} chart..."
                             sh "helm lint ${service}/chart"
                         } else {
-                            echo "?? No chart found for ${service}, skipping"
+                            echo "?? No chart found for ${service}, skipping validation"
                         }
-                    }
-                    
-                    if (fileExists('chart/Chart.yaml')) {
-                        sh "helm lint chart/"
                     }
                 }
             }
@@ -97,21 +89,73 @@ pipeline {
             }
         }
         
-        stage('Deploy') {
+        stage('Deploy Services') {
             when {
                 expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
             }
             steps {
                 script {
-                    echo "?? Deploying application..."
-                    if (fileExists('chart/Chart.yaml')) {
-                        dir('chart') {
-                            sh "helm dependency build ."
-                            sh "helm upgrade --install bank . --namespace default --wait --timeout 5m"
+                    echo "?? Deploying services individually..."
+                    def services = env.SERVICES.split(',')
+                    
+                    // Деплоим каждый сервис параллельно
+                    def deployStages = [:]
+                    
+                    services.each { service ->
+                        deployStages["Deploy ${service}"] = {
+                            script {
+                                if (fileExists("${service}/chart/Chart.yaml")) {
+                                    echo "?? Deploying ${service}..."
+                                    
+                                    // Проверяем существование values.yaml
+                                    def valuesFile = "${service}/chart/values.yaml"
+                                    def valuesArg = fileExists(valuesFile) ? "-f ${valuesFile}" : ""
+                                    
+                                    sh """
+                                    helm upgrade --install ${service} ${service}/chart \
+                                        --namespace default \
+                                        --set image.tag=latest \
+                                        --wait \
+                                        --timeout 3m \
+                                        ${valuesArg}
+                                    """
+                                    echo "? ${service} deployed successfully!"
+                                } else {
+                                    echo "?? No chart found for ${service}, skipping deployment"
+                                }
+                            }
                         }
-                    } else {
-                        echo "?? No umbrella chart found, skipping deployment"
                     }
+                    
+                    parallel deployStages
+                }
+            }
+        }
+        
+        stage('Verify Deployment') {
+            when {
+                expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
+            }
+            steps {
+                script {
+                    echo "?? Checking deployment status..."
+                    def services = env.SERVICES.split(',')
+                    
+                    services.each { service ->
+                        try {
+                            echo "Checking ${service}..."
+                            sh """
+                            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=${service} --namespace default --timeout=60s
+                            echo "? ${service} is ready"
+                            """
+                        } catch (Exception e) {
+                            echo "?? ${service} is not ready yet: ${e.message}"
+                        }
+                    }
+                    
+                    // Показываем общий статус
+                    sh "kubectl get pods -l app.kubernetes.io/name -n default --no-headers | wc -l"
+                    sh "kubectl get deployments -n default"
                 }
             }
         }
@@ -125,17 +169,24 @@ pipeline {
                     echo "?? Running Smoke Tests..."
                     def services = env.SERVICES.split(',')
                     
+                    // Запускаем тесты параллельно
+                    def testStages = [:]
+                    
                     services.each { service ->
-                        try {
-                            echo "Testing ${service}..."
-                            sh """
-                            timeout 30s kubectl run smoke-test-${service} --image=curlimages/curl --rm -i --restart=Never --namespace default -- \
-                              sh -c 'curl -f http://${service}.default.svc.cluster.local:8080/actuator/health && echo \"? ${service} healthy\"' || echo \"?? ${service} health check failed\"
-                            """
-                        } catch (Exception e) {
-                            echo "?? Smoke test for ${service} failed: ${e.message}"
+                        testStages["Test ${service}"] = {
+                            try {
+                                echo "Testing ${service}..."
+                                sh """
+                                timeout 30s kubectl run smoke-test-${service} --image=curlimages/curl --rm -i --restart=Never --namespace default -- \
+                                  sh -c 'curl -f http://${service}.default.svc.cluster.local:8080/actuator/health && echo \"? ${service} healthy\"' || echo \"?? ${service} health check failed\"
+                                """
+                            } catch (Exception e) {
+                                echo "?? Smoke test for ${service} failed: ${e.message}"
+                            }
                         }
                     }
+                    
+                    parallel testStages
                 }
             }
         }
@@ -148,10 +199,15 @@ pipeline {
             sh "kubectl delete pod -l run=smoke-test -n default --ignore-not-found=true"
         }
         success {
-            echo "?? Deployment completed successfully!"
+            echo "?? All services deployed successfully!"
+            // Показываем финальный статус
+            sh "kubectl get pods -n default"
+            sh "kubectl get services -n default"
         }
         failure {
             echo "? Deployment failed - check logs above"
+            sh "kubectl get pods -n default"
+            sh "kubectl describe pods -n default | grep -A 10 -B 5 Error || true"
         }
     }
 }
