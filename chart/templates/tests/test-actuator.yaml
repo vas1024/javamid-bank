@@ -17,6 +17,6 @@ spec:
       curl -f http://exgen:8080/actuator/health &&
       curl -f http://front:8080/actuator/health &&
       curl -f http://notify:8080/actuator/health &&
-      curl -f http://target:8080/actuator/health 
+      curl -f http://transfer:8080/actuator/health 
     ']
   restartPolicy: Never

@@ -61,7 +61,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/**").authenticated()
 
                     // 🔓 Публичные endpoints (если есть)
-                    .requestMatchers("/health", "/error").permitAll()
+                    .requestMatchers("/health", "/error", "/actuator/**").permitAll()
+
 
                     .anyRequest().authenticated()
 

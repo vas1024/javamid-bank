@@ -9,7 +9,7 @@
 для доступа по http к приложению, надо после запуска всех сервисов сделать порт форвард,
 в отдельной консоли запустить команду
 kubectl port-forward service/front 8080:8080 --address 0.0.0.0
-
+в браузере http://<host with kuber>:8080/login
 
 
 логика работы блока наличных cash
@@ -109,7 +109,13 @@ docker-compose -f docker-compose-test.yml up
 
 
 
+helm tests
 
+есть тест в зонтичном чарте, который дергает /actuator/health у каждого сервиса
+запустить можно
+helm test bank
+посмотреть результат
+kubectl logs test-bank-actuators
 
 
 
