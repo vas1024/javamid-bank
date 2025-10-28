@@ -1,15 +1,32 @@
 
+Инфраструктура
+
+разработка на джаве велась на компе под виндовс, проект пушится в гитхаб,
+на дугом компе под линукс делается только пулл из гитхаба.
+на линукс компе установлен дженкинс, докер, кинд
 
 
+порядок ручного деплоя
 
-порядок запуска сервисов
+git pull
+cd $SERVICE_NAME
+mvn clean package -DskipTest
+docker build -t $SERVICE_NAME:latest .
+kind load docker-image $SERVICE_NAME:latest
+helm upgrade --install $SERVICE_NAME ./chart
+kubectl rollout restart deployment/$SERVICE_NAME  
+или
+kubectl rollout restart statefulset/$SERVICE_NAME
+
 
 
 доступ из браузера к микросервису front
+
 для доступа по http к приложению, надо после запуска всех сервисов сделать порт форвард,
 в отдельной консоли запустить команду
 kubectl port-forward service/front 8080:8080 --address 0.0.0.0
 в браузере http://<host with kuber>:8080/login
+
 
 
 логика работы блока наличных cash
@@ -20,6 +37,8 @@ kubectl port-forward service/front 8080:8080 --address 0.0.0.0
 если счета нет, с него нельзя снять деньги, будет ошибка.
 при попытке снять больше денег, чем есть на счету, выдается всё, что есть и баланс счета становится 0.
 это удобно для тестов на удаление пользователя.
+
+
 
 
 безопасность
@@ -45,8 +64,6 @@ c userId в запрашиваемом пути. для этого сервис 
 
 безопасность микросервисов
 
-я уже больше месяца пишу это задание двухнедельного спринта и не получаю никакой обратной связи, я даже не уверен, 
-что двигаюсь в правильном направлении. 
 для демонстрации авторизации сервисов через OAuth2 были выбраны 2 сервиса exchange и exgen.
 сервис exchange имеет два эндпоинта, один для чтения курсов валют, он незащищен, второй для записи, 
 он защищен, нужен токен и проверяется scope=write.
@@ -56,14 +73,16 @@ c userId в запрашиваемом пути. для этого сервис 
 
 
 
+
+
 Dynamic Discovery
 
 для поиска мс исользуется docker dns, для этого у каждого микро сервиса создается 
 кубер сущность сервис с именем как у сервиса, порт у всех мс 8080.
 при нескольких инстансах одного МС load balancing осуществляется кубером,
 для statefulset допускается только один инстанс и дипсик рекомендует обращаться по имени пода 
-http://auth-0.auth-service:8080/api/users/123 чтобы не было путаницы если случайно запустить больше инстансов,
-но будет работать и как для деплоя  http://auth-service:8080/api/users/123
+http://auth-0.auth:8080/api/users/123 чтобы не было путаницы если случайно запустить больше инстансов,
+но будет работать и как для деплоя  http://auth:8080/api/users/123
 
 
 
@@ -85,29 +104,6 @@ kubectl  cp auth-0:/data .
 
 
 
-сборка докера
-
-в каждом модуле есть свой Dockerfile с правильным портом для микросервиса.
-надо зпустить построение джарников
-mvn clean package -DskipTests
-затем из корня проекта запустить
-docker build -t bank/accounts:1.0.0 ./accounts
-docker build -t bank/auth:1.0.0 ./auth
-docker build -t bank/blocker:1.0.0 ./blocker
-docker build -t bank/cash:1.0.0 ./cash
-docker build -t bank/config:1.0.0 ./config
-docker build -t bank/eureka:1.0.0 ./eureka
-docker build -t bank/exchange:1.0.0 ./exchange
-docker build -t bank/exgen:1.0.0 ./exgen
-docker build -t bank/front:1.0.0 ./front
-docker build -t bank/gateway:1.0.0 ./gateway
-docker build -t bank/notify:1.0.0 ./notify
-docker build -t bank/transfer:1.0.0 ./transfer
-затем стартовать весь проект с помощью docker-compose 
-docker-compose -f docker-compose-test.yml up
-
-
-
 
 helm tests
 
@@ -120,6 +116,15 @@ kubectl logs test-bank-actuators
 
 
 недоделки
+
+- разные среды ( dev, test, prod ) в разных namespace. как-то неразумно, ведь будетвзаимовлияние по производительности,
+уж лушче в разных кластерах.
+- не понял смысл зонтичного чарта. если задеплоить все сервисы приложения bank одним чартом, а затем попробовать
+передеплоить один сервис своим чартом, возникает конфликт имен ресурсов (конфигмапы, секреты) такие ресурсы уже есть 
+и хелм помнит, кто ( какой чарт ) их создал и не дает удалять. можно удалить кубером, тогда у нас будет поломанный зонтичны чарт.
+неудобно
+
+
 
 
 ревью к 9му спринту
