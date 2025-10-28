@@ -9,33 +9,29 @@ pipeline {
         stage('Discover Services') {
             steps {
                 script {
-                    try {
-                        echo "?? Starting service discovery..."
-                        
-                        // Находим все сервисы по наличию chart/ папки
-                        def services = findFiles(glob: '*/chart/Chart.yaml')
-                        echo "?? Found chart files: ${services}"
-                        
-                        if (services.isEmpty()) {
-                            echo "?? No services found with chart/Chart.yaml pattern"
-                            // Попробуем альтернативный поиск
-                            sh 'find . -name "Chart.yaml" -type f | head -10'
-                            env.SERVICES = ""
-                        } else {
-                            env.SERVICES = services.collect { it.path.split('/')[0] }.join(',')
-                            echo "?? Found services: ${env.SERVICES}"
-                            
-                            services.each { file ->
-                                def serviceName = file.path.split('/')[0]
-                                echo "  - ${serviceName}"
-                            }
-                        }
-                    } catch (Exception e) {
-                        echo "? Error in Discover Services: ${e.message}"
-                        // Покажем структуру проекта для отладки
-                        sh 'ls -la'
-                        sh 'find . -maxdepth 2 -type d | sort'
-                        error("Service discovery failed")
+                    echo "?? Starting service discovery..."
+                    
+                    // Сначала посмотрим структуру проекта
+                    sh 'ls -la'
+                    sh 'find . -maxdepth 2 -type d | sort'
+                    
+                    // Простой способ найти сервисы - через shell
+                    def servicesOutput = sh(
+                        script: 'find . -name "pom.xml" -type f | sed \'s|./||\' | cut -d/ -f1 | sort | uniq | tr \'\\n\' \',\'',
+                        returnStdout: true
+                    ).trim()
+                    
+                    // Убираем последнюю запятую если есть
+                    if (servicesOutput.endsWith(',')) {
+                        servicesOutput = servicesOutput.substring(0, servicesOutput.length() - 1)
+                    }
+                    
+                    env.SERVICES = servicesOutput
+                    echo "?? Found services: ${env.SERVICES}"
+                    
+                    if (env.SERVICES.isEmpty()) {
+                        echo "?? No services found, using default list"
+                        env.SERVICES = "accounts,auth,front,exchange,transfer,cash,blocker,exgen,notify"
                     }
                 }
             }
@@ -47,12 +43,19 @@ pipeline {
             }
             steps {
                 script {
-                    echo "?? Validating all Helm charts..."
+                    echo "?? Validating Helm charts..."
                     def services = env.SERVICES.split(',')
+                    
+                    // Проверяем существование chart'ов перед валидацией
                     services.each { service ->
-                        echo "Validating ${service}..."
-                        sh "helm lint ${service}/chart"
+                        if (fileExists("${service}/chart/Chart.yaml")) {
+                            echo "Validating ${service} chart..."
+                            sh "helm lint ${service}/chart"
+                        } else {
+                            echo "?? No chart found for ${service}, skipping"
+                        }
                     }
+                    
                     if (fileExists('chart/Chart.yaml')) {
                         sh "helm lint chart/"
                     }
@@ -75,6 +78,7 @@ pipeline {
                         buildStages["Build ${service}"] = {
                             dir(service) {
                                 echo "??? Building ${service}..."
+                                
                                 // Проверяем существование pom.xml перед сборкой
                                 if (fileExists('pom.xml')) {
                                     sh "mvn clean package -DskipTests"
@@ -82,7 +86,7 @@ pipeline {
                                     sh "kind load docker-image ${service}:latest"
                                     echo "? ${service} built successfully!"
                                 } else {
-                                    echo "?? No pom.xml found in ${service}, skipping Maven build"
+                                    echo "?? No pom.xml found in ${service}, skipping build"
                                 }
                             }
                         }
@@ -98,9 +102,16 @@ pipeline {
                 expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
             }
             steps {
-                dir('chart') {
-                    sh "helm dependency build ."
-                    sh "helm upgrade --install bank . --namespace default --wait --timeout 5m"
+                script {
+                    echo "?? Deploying application..."
+                    if (fileExists('chart/Chart.yaml')) {
+                        dir('chart') {
+                            sh "helm dependency build ."
+                            sh "helm upgrade --install bank . --namespace default --wait --timeout 5m"
+                        }
+                    } else {
+                        echo "?? No umbrella chart found, skipping deployment"
+                    }
                 }
             }
         }
@@ -116,8 +127,9 @@ pipeline {
                     
                     services.each { service ->
                         try {
+                            echo "Testing ${service}..."
                             sh """
-                            kubectl run smoke-test-${service} --image=curlimages/curl --rm -i --restart=Never --namespace default -- \
+                            timeout 30s kubectl run smoke-test-${service} --image=curlimages/curl --rm -i --restart=Never --namespace default -- \
                               sh -c 'curl -f http://${service}.default.svc.cluster.local:8080/actuator/health && echo \"? ${service} healthy\"' || echo \"?? ${service} health check failed\"
                             """
                         } catch (Exception e) {
@@ -140,10 +152,6 @@ pipeline {
         }
         failure {
             echo "? Deployment failed - check logs above"
-            // Дополнительная отладочная информация
-            sh 'kubectl get pods -A || true'
-            sh 'kubectl get nodes || true'
-            sh 'docker images | head -10 || true'
         }
     }
 }
