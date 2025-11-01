@@ -7,18 +7,13 @@ pipeline {
     }
     stages {
 
+
 stage('Discover Services') {
     steps {
         script {
-            def servicesOutput = sh(
-                script: '''
-                grep "name:" chart/Chart.yaml | awk '{print $NF}' | paste -sd ','
-                ''',
-                returnStdout: true
-            ).trim()
-           
-            env.SERVICES = servicesOutput
-            echo "Services discovered from chart/Chart.yaml: ${env.SERVICES}"
+            def values = readYaml file: 'chart/values.yaml'
+            env.SERVICES = values.global?.fullListOfServices
+            echo "Full list of services from values.yaml: ${env.SERVICES}"
         }
     }
 }
