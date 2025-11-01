@@ -146,38 +146,7 @@ pipeline {
             }
         }
         
-        stage('Smoke Tests') {
-            when {
-                expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
-            }
-            steps {
-                script {
-                    echo "?? Running Smoke Tests..."
-                    def services = env.SERVICES.split(',')
-                    
-                    // Запускаем тесты параллельно
-                    def testStages = [:]
-                    
-                    services.each { service ->
-                        testStages["Test ${service}"] = {
-                            try {
-                                echo "Testing ${service}..."
-                                sh """
-                                timeout 30s kubectl run smoke-test-${service} --image=curlimages/curl --rm -i --restart=Never --namespace default -- \
-                                  sh -c 'curl -f http://${service}.default.svc.cluster.local:8080/actuator/health && echo \"? ${service} healthy\"' || echo \"?? ${service} health check failed\"
-                                """
-                            } catch (Exception e) {
-                                echo "?? Smoke test for ${service} failed: ${e.message}"
-                            }
-                        }
-                    }
-                    
-                    parallel testStages
-                }
-            }
-        }
-
-
+ 
 
 stage('Smoke Tests') {
     steps {
