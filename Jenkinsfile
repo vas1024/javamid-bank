@@ -176,6 +176,76 @@ pipeline {
                 }
             }
         }
+
+
+
+stage('Smoke Tests') {
+    steps {
+        script {
+            echo "?? Running Smoke Tests..."
+            
+            // Удаляем старый тестовый под
+            sh 'kubectl delete pod smoke-test-bank --ignore-not-found=true --namespace default'
+            
+            // Формируем команду для всех сервисов
+            def services = env.SERVICES.split(',')
+            def curlCommands = services.collect { service ->
+                "curl -f http://${service}:8080/actuator/health && echo \"? ${service} healthy\""
+            }.join(' && ')
+            
+            // Создаем под с одной командой
+            sh """
+            kubectl run smoke-test-bank \
+                --image=curlimages/curl \
+                --namespace default \
+                --restart=Never \
+                -- \
+                sh -c '
+                  echo "?? Starting comprehensive smoke tests..." &&
+                  ${curlCommands} &&
+                  echo "?? All services are healthy!"
+                '
+            """
+            
+            // Ждем и логируем
+            sh '''
+            echo "? Waiting for tests to complete..."
+            kubectl wait --for=condition=Ready pod/smoke-test-all --timeout=60s --namespace default
+            kubectl logs smoke-test-all --namespace default -f
+            '''
+            
+            // Проверяем результат
+            def result = sh(
+                script: 'kubectl get pod smoke-test-all -o jsonpath="{.status.phase}" --namespace default',
+                returnStdout: true
+            ).trim()
+
+           // УДАЛЯЕМ ПОД ПОСЛЕ ТЕСТОВ
+            sh 'kubectl delete pod smoke-test-bank --namespace default --ignore-not-found=true'
+            
+            if (result != "Succeeded") {
+                error "? Smoke tests failed"
+            } else {
+                echo "? All smoke tests passed!"
+            }
+        }
+    }
+}
+
+
+
+stage('Helm Tests') {
+    steps {
+        script {
+            echo "?? Running Helm tests..."
+            sh "helm test bank --namespace default --timeout 3m"
+        }
+    }
+}
+
+
+
+
     }
     post {
         always {
