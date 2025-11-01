@@ -200,27 +200,64 @@ pipeline {
 
 
 
+
+
+
+
 def parseDependenciesFromYaml(String yamlContent) {
     def services = []
     def lines = yamlContent.split('\n')
     def inDependencies = false
     def currentService = null
     
-    lines.each { line ->
+    echo "?? Starting YAML parsing..."
+    echo "Total lines: ${lines.size()}"
+    
+    lines.eachWithIndex { line, index ->
         def trimmed = line.trim()
+        echo "Line ${index}: '${trimmed}'"
         
         if (trimmed == 'dependencies:') {
             inDependencies = true
-        } else if (inDependencies && !trimmed.startsWith('-') && trimmed.contains(':')) {
-            // Вышли из dependencies
+            echo "? Entered dependencies section"
+        } else if (inDependencies && !trimmed.startsWith('-') && !trimmed.startsWith(' ') && trimmed.contains(':')) {
+            // Вышли из dependencies (нашли другой корневой ключ)
             inDependencies = false
+            echo "? Exited dependencies section (found other root key: ${trimmed})"
         } else if (inDependencies && trimmed.startsWith('- name:')) {
             // Нашли сервис
             def serviceName = trimmed.replace('- name:', '').trim()
             serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
             services.add(serviceName)
+            echo "?? Found service: ${serviceName}"
+        } else if (inDependencies && trimmed.startsWith('name:')) {
+            // Альтернативный формат (без дефиса)
+            def serviceName = trimmed.replace('name:', '').trim()
+            serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
+            services.add(serviceName)
+            echo "?? Found service (alt format): ${serviceName}"
         }
     }
     
+    echo "?? Final services list: ${services}"
     return services
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
