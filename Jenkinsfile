@@ -6,32 +6,18 @@ pipeline {
         skipDefaultCheckout(false)
     }
     stages {
+
         stage('Discover Services') {
             steps {
                 script {
-                    echo "?? Starting service discovery..."
-                    
-                    // Ищем сервисы - только в подпапках, исключая корневой pom.xml
-                    def servicesOutput = sh(
-                        script: 'find . -mindepth 2 -name "pom.xml" -type f | grep -v "^./pom.xml" | sed \'s|./||\' | cut -d/ -f1 | sort | uniq | tr \'\\n\' \',\'',
-                        returnStdout: true
-                    ).trim()
-                    
-                    // Убираем последнюю запятую если есть
-                    if (servicesOutput.endsWith(',')) {
-                        servicesOutput = servicesOutput.substring(0, servicesOutput.length() - 1)
-                    }
-                    
-                    env.SERVICES = servicesOutput
-                    echo "?? Found services: ${env.SERVICES}"
-                    
-                    if (env.SERVICES.isEmpty()) {
-                        echo "?? No services found, using default list"
-                        env.SERVICES = "accounts,auth,front,exchange,transfer,cash,blocker,exgen,notify"
-                    }
+                    def chartYaml = readFile file: 'chart/Chart.yaml'
+                    def services = parseDependenciesFromYaml(chartYaml)
+                    env.SERVICES = services.join(',')
+                    echo "Services from Chart.yaml: ${env.SERVICES}"
                 }
             }
         }
+
         
         stage('Validate Charts') {
             when {
@@ -210,4 +196,31 @@ pipeline {
             sh "kubectl describe pods -n default | grep -A 10 -B 5 Error || true"
         }
     }
+}
+
+
+
+def parseDependenciesFromYaml(String yamlContent) {
+    def services = []
+    def lines = yamlContent.split('\n')
+    def inDependencies = false
+    def currentService = null
+    
+    lines.each { line ->
+        def trimmed = line.trim()
+        
+        if (trimmed == 'dependencies:') {
+            inDependencies = true
+        } else if (inDependencies && !trimmed.startsWith('-') && trimmed.contains(':')) {
+            // Вышли из dependencies
+            inDependencies = false
+        } else if (inDependencies && trimmed.startsWith('- name:')) {
+            // Нашли сервис
+            def serviceName = trimmed.replace('- name:', '').trim()
+            serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
+            services.add(serviceName)
+        }
+    }
+    
+    return services
 }

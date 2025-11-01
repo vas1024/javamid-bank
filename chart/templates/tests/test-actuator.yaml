@@ -9,14 +9,9 @@ spec:
   - name: test-integration
     image: curlimages/curl
     command: ['sh', '-c', '
-      curl -f http://accounts:8080/actuator/health && 
-      curl -f http://auth:8080/actuator/health &&
-      curl -f http://blocker:8080/actuator/health &&
-      curl -f http://cash:8080/actuator/health &&
-      curl -f http://exchange:8080/actuator/health &&
-      curl -f http://exgen:8080/actuator/health &&
-      curl -f http://front:8080/actuator/health &&
-      curl -f http://notify:8080/actuator/health &&
-      curl -f http://transfer:8080/actuator/health 
+      {{- range .Chart.dependencies }}
+      curl -f http://{{ .name }}:8080/actuator/health &&
+      {{- end }}
+      echo "All services are healthy!"
     ']
   restartPolicy: Never
