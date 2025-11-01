@@ -179,13 +179,13 @@ stage('Smoke Tests') {
             // Ждем и логируем
             sh '''
             echo "? Waiting for tests to complete..."
-            kubectl wait --for=condition=Ready pod/smoke-test-all --timeout=60s --namespace default
-            kubectl logs smoke-test-all --namespace default -f
+            kubectl wait --for=condition=Ready pod/smoke-test-bank --timeout=60s --namespace default
+            kubectl logs smoke-test-bank --namespace default -f
             '''
             
             // Проверяем результат
             def result = sh(
-                script: 'kubectl get pod smoke-test-all -o jsonpath="{.status.phase}" --namespace default',
+                script: 'kubectl get pod smoke-test-bank -o jsonpath="{.status.phase}" --namespace default',
                 returnStdout: true
             ).trim()
 
@@ -240,14 +240,12 @@ stage('Helm Tests') {
 
 
 
-
-
+  
 
 def parseDependenciesFromYaml(String yamlContent) {
     def services = []
     def lines = yamlContent.split('\n')
     def inDependencies = false
-    def currentService = null
     
     echo "?? Starting YAML parsing..."
     echo "Total lines: ${lines.size()}"
@@ -259,8 +257,8 @@ def parseDependenciesFromYaml(String yamlContent) {
         if (trimmed == 'dependencies:') {
             inDependencies = true
             echo "? Entered dependencies section"
-        } else if (inDependencies && !trimmed.startsWith('-') && !trimmed.startsWith(' ') && trimmed.contains(':')) {
-            // Вышли из dependencies (нашли другой корневой ключ)
+        } else if (inDependencies && !trimmed.startsWith(' ') && !trimmed.startsWith('-') && trimmed.contains(':')) {
+            // Вышли из dependencies только если это корневой ключ (без отступов)
             inDependencies = false
             echo "? Exited dependencies section (found other root key: ${trimmed})"
         } else if (inDependencies && trimmed.startsWith('- name:')) {
@@ -269,12 +267,6 @@ def parseDependenciesFromYaml(String yamlContent) {
             serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
             services.add(serviceName)
             echo "?? Found service: ${serviceName}"
-        } else if (inDependencies && trimmed.startsWith('name:')) {
-            // Альтернативный формат (без дефиса)
-            def serviceName = trimmed.replace('name:', '').trim()
-            serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
-            services.add(serviceName)
-            echo "?? Found service (alt format): ${serviceName}"
         }
     }
     
