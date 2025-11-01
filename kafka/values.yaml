@@ -1,5 +1,6 @@
 replicas: 2
 
 image: "apache/kafka:4.0.0"
+imagePullPolicy: IfNotPresent
 
 storageSize: "1Gi"
