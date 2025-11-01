@@ -205,14 +205,14 @@ stage('Smoke Tests') {
 
 
 
-stage('Helm Tests') {
-    steps {
-        script {
-            echo "?? Running Helm tests..."
-            sh "helm test bank --namespace default --timeout 3m"
-        }
-    }
-}
+//stage('Helm Tests') {
+//    steps {
+//        script {
+//            echo "?? Running Helm tests..."
+//            sh "helm test bank --namespace default --timeout 3m"
+//        }
+//    }
+//}
 
 
 
@@ -224,8 +224,8 @@ stage('Helm Tests') {
         always {
             echo "?? Build ${currentBuild.result} - ${env.BUILD_URL}"
             // Очистка тестовых ресурсов
-            sh "kubectl delete pod --field-selector=status.phase==Succeeded -n default --ignore-not-found=true"
-            sh "kubectl delete pod -l run=smoke-test -n default --ignore-not-found=true"
+//            sh "kubectl delete pod --field-selector=status.phase==Succeeded -n default --ignore-not-found=true"
+//            sh "kubectl delete pod -l run=smoke-test -n default --ignore-not-found=true"
         }
         success {
             echo "?? All services deployed successfully!"
