@@ -1,0 +1,8 @@
+# Количество брокеров
+replicas: 2
+
+# Образ Kafka
+image: "apache/kafka:4.0.0"
+
+# Размер диска
+storageSize: "1Gi"

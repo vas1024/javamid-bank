@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  serviceName: kafka-headless
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      # Размещаем на разных нодах
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: kafka
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: kafka
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: 9092
+        env:
+        - name: KAFKA_BROKER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        # Простые настройки Kafka
+        command:
+        - "sh"
+        - "-c"
+        - |
+          # Создаем базовый конфиг
+          cat > /tmp/server.properties << EOF
+          broker.id=${KAFKA_BROKER_ID#kafka-}
+          listeners=PLAINTEXT://:9092
+          advertised.listeners=PLAINTEXT://kafka-${KAFKA_BROKER_ID#kafka-}.kafka:9092
+          num.partitions=2
+          default.replication.factor=2
+          log.dirs=/kafka/data
+          EOF
+          
+          # Запускаем Kafka
+          /opt/kafka/bin/kafka-server-start.sh /tmp/server.properties
+        volumeMounts:
+        - name: data
+          mountPath: /kafka/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.storageSize }}
