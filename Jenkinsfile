@@ -7,17 +7,21 @@ pipeline {
     }
     stages {
 
-        stage('Discover Services') {
-            steps {
-                script {
-                    def chartYaml = readFile file: 'chart/Chart.yaml'
-                    def services = parseDependenciesFromYaml(chartYaml)
-                    env.SERVICES = services.join(',')
-                    echo "Services from Chart.yaml: ${env.SERVICES}"
-                }
-            }
+stage('Discover Services') {
+    steps {
+        script {
+            def servicesOutput = sh(
+                script: '''
+                grep "name:" chart/Chart.yaml | awk '{print $NF}' | paste -sd ','
+                ''',
+                returnStdout: true
+            ).trim()
+           
+            env.SERVICES = servicesOutput
+            echo "Services discovered from chart/Chart.yaml: ${env.SERVICES}"
         }
-
+    }
+}
         
         stage('Validate Charts') {
             when {
@@ -178,8 +182,7 @@ stage('Smoke Tests') {
             
             // Ждем и логируем
             sh '''
-            echo "? Waiting for tests to complete..."
-            kubectl wait --for=condition=Ready pod/smoke-test-bank --timeout=60s --namespace default
+            echo "logs for smoke-test-bank..."
             kubectl logs smoke-test-bank --namespace default -f
             '''
             
@@ -236,59 +239,4 @@ stage('Helm Tests') {
         }
     }
 }
-
-
-
-
-  
-
-def parseDependenciesFromYaml(String yamlContent) {
-    def services = []
-    def lines = yamlContent.split('\n')
-    def inDependencies = false
-    
-    echo "?? Starting YAML parsing..."
-    echo "Total lines: ${lines.size()}"
-    
-    lines.eachWithIndex { line, index ->
-        def trimmed = line.trim()
-        echo "Line ${index}: '${trimmed}'"
-        
-        if (trimmed == 'dependencies:') {
-            inDependencies = true
-            echo "? Entered dependencies section"
-        } else if (inDependencies && !trimmed.startsWith(' ') && !trimmed.startsWith('-') && trimmed.contains(':')) {
-            // Вышли из dependencies только если это корневой ключ (без отступов)
-            inDependencies = false
-            echo "? Exited dependencies section (found other root key: ${trimmed})"
-        } else if (inDependencies && trimmed.startsWith('- name:')) {
-            // Нашли сервис
-            def serviceName = trimmed.replace('- name:', '').trim()
-            serviceName = serviceName.replaceAll('"', '').replaceAll("'", "")
-            services.add(serviceName)
-            echo "?? Found service: ${serviceName}"
-        }
-    }
-    
-    echo "?? Final services list: ${services}"
-    return services
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
