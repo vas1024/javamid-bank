@@ -11,12 +11,18 @@ pipeline {
 stage('Discover Services') {
     steps {
         script {
-            def values = readYaml file: 'chart/values.yaml'
-            env.SERVICES = values.global?.fullListOfServices
+            def servicesOutput = sh(
+                script: '''
+                grep "fullListOfServices" chart/values.yaml | awk -F: '{print $2}' | tr -d ' "'
+                ''',
+                returnStdout: true
+            ).trim()
+            env.SERVICES = servicesOutput
             echo "Full list of services from values.yaml: ${env.SERVICES}"
         }
     }
 }
+
         
         stage('Validate Charts') {
             when {
