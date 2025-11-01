@@ -13,7 +13,7 @@ spec:
       labels:
         app: kafka
     spec:
-      # Размещаем на разных нодах
+      # different nodes
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -31,12 +31,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        # Простые настройки Kafka
+
         command:
         - "sh"
         - "-c"
         - |
-          # Создаем базовый конфиг
+
           cat > /tmp/server.properties << EOF
           broker.id=${KAFKA_BROKER_ID#kafka-}
           listeners=PLAINTEXT://:9092
@@ -46,7 +46,7 @@ spec:
           log.dirs=/kafka/data
           EOF
           
-          # Запускаем Kafka
+
           /opt/kafka/bin/kafka-server-start.sh /tmp/server.properties
         volumeMounts:
         - name: data
