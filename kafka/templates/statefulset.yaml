@@ -1,26 +1,7 @@
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: kafka
+# templates/statefulset.yaml
 spec:
-  serviceName: kafka-headless
-  replicas: {{ .Values.replicas }}
-  selector:
-    matchLabels:
-      app: kafka
   template:
-    metadata:
-      labels:
-        app: kafka
     spec:
-      # different nodes  affinity
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: kafka
-            topologyKey: kubernetes.io/hostname
       containers:
       - name: kafka
         image: {{ .Values.image }}
@@ -28,53 +9,51 @@ spec:
         - containerPort: 9092
         - containerPort: 9093
         env:
-        - name: KAFKA_CLUSTER_ID
-          value: "MvpMQqR4RTiIHt5nPobxTQ"
-        - name: KAFKA_PROCESS_ROLES
-          value: "broker,controller"
         - name: KAFKA_NODE_ID
-          value: "0"
-        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
-          value: "0@kafka-0.kafka-headless:9093,1@kafka-1.kafka-headless:9093"
-        - name: KAFKA_LISTENERS
-          value: "PLAINTEXT://:9092,CONTROLLER://:9093"
-        - name: KAFKA_ADVERTISED_LISTENERS
-          value: "PLAINTEXT://${HOSTNAME}.kafka:9092"
-        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-          value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
-        - name: KAFKA_NUM_PARTITIONS
-          value: "2"
-        - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-          value: "2"
-        - name: KAFKA_LOG_DIRS
-          value: "/kafka/data"
+          value: "777"  # to be defined later
+        - name: KAFKA_CLUSTER_ID
+          value: {{ .Values.clusterId }}
+        volumeMounts:
+        - name: config
+          mountPath: /opt/kafka/config/custom-server.properties
+          subPath: server.properties
+        - name: data
+          mountPath: /kafka/data
         command:
         - "sh"
         - "-c"
         - |
-          # node.id from pod name
           export KAFKA_NODE_ID=$(echo $HOSTNAME | sed 's/kafka-//')
-          echo "Starting Kafka with node.id: $KAFKA_NODE_ID"
-          printenv
-          ls -al /kafka/data
-          df -h
-          echo "Waiting for volume to mount..."
-          echo "aaa" > /kafka/data/test.txt
-          sleep 5
-          df -h
-          echo "grep log.dir"
-          grep "log.dir" /opt/kafka/config/server.properties
-          sleep 8000
-          # start kafka with settings from env var
-          # /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
-        volumeMounts:
-        - name: data
-          mountPath: /kafka/data
-  volumeClaimTemplates:
+          export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://${HOSTNAME}.kafka:9092"
+          
+          # formatting only once per helm install 
+          if [ ! -f /kafka/data/meta.properties ]; then
+            echo "First run - formatting storage..."
+            /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID --override log.dirs=/kafka/data
+          fi
+          
+          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/custom-server.properties
+      volumes:  
+      - name: config
+        configMap:
+          name: kafka-config
+  volumeClaimTemplates:  
   - metadata:
       name: data
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: {{ .Values.storageSize }}
+          storage: {{ .Values.storageSize | default "1Gi" }}
+
+
+
+
+
+
+
+
+
+
+
+
