@@ -45,13 +45,15 @@ spec:
           export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://${HOSTNAME}.kafka:9092"
           echo "KAFKA_NODE_ID=$KAFKA_NODE_ID"
 
+          sleep 8000
+
           # formatting only once per helm install 
           if [ ! -f /kafka/data/meta.properties ]; then
             echo "First run - formatting storage..."
             /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID --config /opt/kafka/config/custom-server.properties
           fi
           
-          sleep 8000
+
 
           /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/custom-server.properties --override node.id=$KAFKA_NODE_ID
       volumes:  
