@@ -55,7 +55,7 @@ spec:
           default.replication.factor=2
           EOF
           echo "node.id=${HOSTNAME#kafka-}" >> /tmp/my-kafka-conf.properties
-          echo "advertised.listeners=PLAINTEXT://${HOSTNAME}.kafka:9092" >> /tmp/my-kafka-conf.properties
+          echo "advertised.listeners=PLAINTEXT://${HOSTNAME}.kafka-headless:9092" >> /tmp/my-kafka-conf.properties
 
 
           /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /tmp/my-kafka-conf.properties --ignore-formatted          
