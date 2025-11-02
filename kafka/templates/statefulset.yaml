@@ -44,6 +44,8 @@ spec:
           value: "2"
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
           value: "2"
+        - name: KAFKA_LOG_DIRS
+          value: "/kafka/data"
         command:
         - "sh"
         - "-c"
@@ -53,7 +55,7 @@ spec:
           echo "Starting Kafka with node.id: $KAFKA_NODE_ID"
           printenv
           ls -al /kafka/data
-          cat /opt/kafka/config/server.properties
+          df -h
           # start kafka with settings from env var
           /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
         volumeMounts:
