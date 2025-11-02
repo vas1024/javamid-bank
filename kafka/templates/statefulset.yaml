@@ -57,8 +57,11 @@ spec:
           ls -al /kafka/data
           df -h
           echo "Waiting for volume to mount..."
-          sleep 10
+          echo "aaa" > /kafka/data/test.txt
+          sleep 5
           df -h
+          echo "grep log.dir"
+          grep "log.dir" /opt/kafka/config/server.properties
           # start kafka with settings from env var
           /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
         volumeMounts:
