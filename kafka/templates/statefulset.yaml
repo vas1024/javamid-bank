@@ -63,7 +63,7 @@ spec:
           echo "grep log.dir"
           grep "log.dir" /opt/kafka/config/server.properties
           # start kafka with settings from env var
-          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
+          # /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
         volumeMounts:
         - name: data
           mountPath: /kafka/data
