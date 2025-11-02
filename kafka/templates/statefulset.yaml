@@ -28,6 +28,8 @@ spec:
         - containerPort: 9092
         - containerPort: 9093
         env:
+        - name: KAFKA_CLUSTER_ID
+          value: "MvpMQqR4RTiIHt5nPobxTQ"
         - name: KAFKA_PROCESS_ROLES
           value: "broker,controller"
         - name: KAFKA_NODE_ID
@@ -62,6 +64,7 @@ spec:
           df -h
           echo "grep log.dir"
           grep "log.dir" /opt/kafka/config/server.properties
+          sleep 8000
           # start kafka with settings from env var
           # /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
         volumeMounts:
