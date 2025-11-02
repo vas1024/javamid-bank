@@ -56,7 +56,7 @@ spec:
           num.partitions=2
           default.replication.factor=2
           EOF
-          echo $HOSTNAME | sed 's/kafka-//' >> /tmp/my-kafka-conf.properties
+          echo "node.id=${HOSTNAME#kafka-}" >> /tmp/my-kafka-conf.properties
 
 
           /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /tmp/my-kafka-conf.properties --ignore-formatted          
