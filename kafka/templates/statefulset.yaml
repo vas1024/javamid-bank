@@ -44,26 +44,16 @@ spec:
           value: "2"
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
           value: "2"
-        - name: KAFKA_LOG_DIRS
-          value: "/kafka/data"
         command:
         - "sh"
         - "-c"
         - |
+          # node.id from pod name
           export KAFKA_NODE_ID=$(echo $HOSTNAME | sed 's/kafka-//')
           echo "Starting Kafka with node.id: $KAFKA_NODE_ID"
- 
-          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties \
-            --override process.roles=broker,controller \
-            --override node.id=$KAFKA_NODE_ID \
-            --override controller.quorum.voters=0@kafka-0.kafka-headless:9093,1@kafka-1.kafka-headless:9093 \
-            --override listeners=PLAINTEXT://:9092,CONTROLLER://:9093 \
-            --override advertised.listeners=PLAINTEXT://kafka-$KAFKA_NODE_ID.kafka:9092 \
-            --override log.dirs=/kafka/data \
-            --override num.partitions=2 \
-            --override default.replication.factor=2
-
-
+          printenv
+          # start kafka with settings from env var
+          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
         volumeMounts:
         - name: data
           mountPath: /kafka/data
