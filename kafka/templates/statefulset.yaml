@@ -43,17 +43,15 @@ spec:
         - |
           export KAFKA_NODE_ID=$(echo $HOSTNAME | sed 's/kafka-//')
           export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://${HOSTNAME}.kafka:9092"
+          echo "KAFKA_NODE_ID=$KAFKA_NODE_ID"
 
-          sed -i "s/nodeIdPlaceHolder/$KAFKA_NODE_ID/g" /opt/kafka/config/custom-server.properties
-          sed -i "s/advertisedListenersPlaceHolder/$KAFKA_ADVERTISED_LISTENERS/g" /opt/kafka/config/custom-server.properties
-          
           # formatting only once per helm install 
           if [ ! -f /kafka/data/meta.properties ]; then
             echo "First run - formatting storage..."
             /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID --config /opt/kafka/config/custom-server.properties
           fi
           
-          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/custom-server.properties
+          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/custom-server.properties --override node.id=$KAFKA_NODE_ID
       volumes:  
       - name: config
         configMap:
