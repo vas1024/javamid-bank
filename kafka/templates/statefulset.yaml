@@ -57,10 +57,7 @@ spec:
           ls -al /kafka/data
           df -h
           echo "Waiting for volume to mount..."
-            while [ ! -d /kafka/data ]; do
-              echo "Volume not mounted yet, waiting..."
-              sleep 2
-            done
+          sleep 10
           df -h
           # start kafka with settings from env var
           /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
