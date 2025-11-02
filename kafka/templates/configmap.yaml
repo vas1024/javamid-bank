@@ -19,6 +19,3 @@ data:
     # Topics
     num.partitions=2
     default.replication.factor=2
-    
-    node.id=nodeIdPlaceHolder
-    advertised.listeners=advertisedListenersPlaceHolder
