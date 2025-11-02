@@ -14,6 +14,13 @@ spec:
         app: kafka
     spec:
       # different nodes  affinity
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: kafka
+            topologyKey: kubernetes.io/hostname
       containers:
       - name: kafka
         image: {{ .Values.image }}
@@ -53,7 +60,7 @@ spec:
           sleep 10
           df -h
           # start kafka with settings from env var
-          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+          /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties  --override log.dirs=/kafka/data
         volumeMounts:
         - name: data
           mountPath: /kafka/data
