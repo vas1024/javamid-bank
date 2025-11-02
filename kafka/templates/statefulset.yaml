@@ -30,9 +30,6 @@ spec:
         - name: KAFKA_CLUSTER_ID
           value: {{ .Values.clusterId }}
         volumeMounts:
-        - name: config
-          mountPath: /opt/kafka/config/custom-server.properties
-          subPath: server.properties
         - name: data
           mountPath: /kafka/data
         command:
@@ -57,16 +54,13 @@ spec:
           default.replication.factor=2
           EOF
           echo "node.id=${HOSTNAME#kafka-}" >> /tmp/my-kafka-conf.properties
+          echo "advrtised.listeners=PLAINTEXT://${HOSTNAME}.kafka:9092" >> /tmp/my-kafka-conf.properties
 
 
           /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /tmp/my-kafka-conf.properties --ignore-formatted          
 
           /opt/kafka/bin/kafka-server-start.sh /tmp/my-kafka-conf.properties
 
-      volumes:  
-      - name: config
-        configMap:
-          name: kafka-config
   volumeClaimTemplates:  
   - metadata:
       name: data
