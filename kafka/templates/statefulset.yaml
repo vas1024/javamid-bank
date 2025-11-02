@@ -13,14 +13,7 @@ spec:
       labels:
         app: kafka
     spec:
-      # different nodes
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: kafka
-            topologyKey: kubernetes.io/hostname
+      # different nodes  affinity
       containers:
       - name: kafka
         image: {{ .Values.image }}
