@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TransferConsumer {
 
-  private static final Logger log = LoggerFactory.getLogger(NotifyConsumer.class);
+  private static final Logger log = LoggerFactory.getLogger(TransferConsumer.class);
 
   @KafkaListener(topics = "transfer")
   public void listen(TransferDto transfer) {
