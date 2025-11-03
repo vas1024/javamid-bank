@@ -106,6 +106,7 @@ stage('Discover Services') {
                                     helm upgrade --install ${service} ${service}/chart \
                                         --namespace default \
                                         --set image.tag=latest \
+                                        --force \
                                         --wait \
                                         --timeout 3m \
                                         ${valuesArg}
@@ -136,7 +137,7 @@ stage('Discover Services') {
                         try {
                             echo "Checking ${service}..."
                             sh """
-                            kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=${service} --namespace default --timeout=60s
+                            kubectl wait --for=condition=ready pod -l app=${service} --namespace default --timeout=60s
                             echo "? ${service} is ready"
                             """
                         } catch (Exception e) {
@@ -145,7 +146,7 @@ stage('Discover Services') {
                     }
                     
                     // Показываем общий статус
-                    sh "kubectl get pods -l app.kubernetes.io/name -n default --no-headers | wc -l"
+                    sh "kubectl get pods -l app -n default --no-headers | wc -l"
                     sh "kubectl get deployments -n default"
                 }
             }
