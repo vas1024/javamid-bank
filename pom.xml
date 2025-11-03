@@ -25,12 +25,9 @@
         <module>auth</module>
         <module>blocker</module>
         <module>cash</module>
-        <module>config</module>
-        <module>eureka</module>
         <module>exchange</module>
         <module>exgen</module>
         <module>front</module>
-        <module>gateway</module>
         <module>notify</module>
         <module>transfer</module>
     </modules>
