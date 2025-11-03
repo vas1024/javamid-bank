@@ -12,7 +12,8 @@ public class TransferConsumer {
   private static final Logger log = LoggerFactory.getLogger(TransferConsumer.class);
 
   @KafkaListener(topics = "transfer")
-  public void listen(TransferDto transfer) {
+  public void consume(TransferDto transfer) {
+    log.info("✅ KAFKA LISTENER TRIGGERED!");
     log.info("Received transfer: {}", transfer);
 
     // Ваша логика обработки трансфера

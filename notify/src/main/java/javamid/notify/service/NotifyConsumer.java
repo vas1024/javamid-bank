@@ -19,6 +19,6 @@ public class NotifyConsumer {
 
   private void processNotification(String message) {
     // Преобразуйте JSON в объект, обработайте и т.д.
-    log.info("Processing notification: {}", message);
+    log.info("Processing notification: {}", message); 
   }
 }
