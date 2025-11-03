@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+spec:
+  serviceName: kafka-headless
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: kafka
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: kafka
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: 9092
+        - containerPort: 9093
+        env:
+        - name: KAFKA_CLUSTER_ID
+          value: {{ .Values.clusterId }}
+        volumeMounts:
+        - name: data
+          mountPath: /kafka/data
+        command:
+        - "sh"
+        - "-c"
+        - |
+          export KAFKA_NODE_ID=$(echo $HOSTNAME | sed 's/kafka-//')
+          export KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://${HOSTNAME}.kafka:9092"
+          echo "KAFKA_NODE_ID=$KAFKA_NODE_ID"
+
+
+          cat > /tmp/my-kafka-conf.properties << EOF
+          process.roles=broker,controller
+          # node.id=0
+          controller.quorum.voters=0@kafka-0.kafka-headless:9093,1@kafka-1.kafka-headless:9093
+          #controller.quorum.voters=0@kafka-0.kafka-headless.default.svc.cluster.local:9093,1@kafka-1.kafka-headless.default.svc.cluster.local:9093
+          listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+          #advertised.listeners=PLAINTEXT://localhost:9092
+          listener.security.protocol.map=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          controller.listener.names=CONTROLLER
+          log.dirs=/kafka/data
+          num.partitions=2
+          default.replication.factor=2
+          EOF
+          echo "node.id=${HOSTNAME#kafka-}" >> /tmp/my-kafka-conf.properties
+          echo "advertised.listeners=PLAINTEXT://${HOSTNAME}.kafka-headless:9092" >> /tmp/my-kafka-conf.properties
+
+
+          /opt/kafka/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c /tmp/my-kafka-conf.properties --ignore-formatted          
+
+          /opt/kafka/bin/kafka-server-start.sh /tmp/my-kafka-conf.properties
+
+  volumeClaimTemplates:  
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.storageSize | default "1Gi" }}
