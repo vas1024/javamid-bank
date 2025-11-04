@@ -34,9 +34,12 @@ public class NotifyController {
 
   }
 
+  /*
   @PostMapping("/transfer")
   public ResponseEntity<?> postTransfer(@RequestBody TransferDto transferDto){
     notifyService.saveTransferNote( transferDto );
     return ResponseEntity.ok().build();
   }
+  */
+
 }
