@@ -19,11 +19,9 @@ public class ExchangeConsumer {
   public void consumeRates(List<ExchangeRateDto> rates) {
     System.out.println("✅ Получены курсы: " + rates.size() + " записей");
 
-    rates.forEach(rateDto -> {
-        if (rateDto.getName() != null && rateDto.getValue() > 0) {
-          exchangeService.updateRate(rateDto.getName().toUpperCase(), rateDto.getValue());
-        }
-    });
+    for (Object item : rates) {
+      System.out.println("item is of Class:" + item.getClass());
+    }
 
   }
 }
