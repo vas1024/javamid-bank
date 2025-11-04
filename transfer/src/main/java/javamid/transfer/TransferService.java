@@ -1,6 +1,7 @@
 package javamid.transfer;
 
 import javamid.transfer.client.AllClients;
+import javamid.transfer.client.NotifyProducer;
 import javamid.transfer.model.ExchangeRateDto;
 import javamid.transfer.model.TransferDto;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,7 +20,12 @@ public class TransferService {
 
 
   private final AllClients allClients;
-  public TransferService(AllClients allClients){ this.allClients = allClients ; }
+  private final NotifyProducer notifyProducer;
+  public TransferService(AllClients allClients,
+                         NotifyProducer notifyProducer){
+    this.allClients = allClients ;
+    this.notifyProducer = notifyProducer;
+  }
 
   public String transfer( TransferDto transferDto ) {
 
@@ -67,6 +73,9 @@ public class TransferService {
 
     if( ! result.startsWith("Error:")) {
       allClients.notify(transferDto);
+
+      String resultKafka = notifyProducer.notifyKafka(transferDto);
+      System.out.println("write to kafka result: " + resultKafka);
     }
 
 
