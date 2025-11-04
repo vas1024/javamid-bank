@@ -72,8 +72,8 @@ public class TransferService {
     String result = allClients.transfer(transferDto);
 
     if( ! result.startsWith("Error:")) {
-      allClients.notify(transferDto);
 
+//      allClients.notify(transferDto);
       String resultKafka = notifyProducer.notifyKafka(transferDto);
       System.out.println("write to kafka result: " + resultKafka);
     }

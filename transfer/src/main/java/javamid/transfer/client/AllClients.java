@@ -87,7 +87,7 @@ public class AllClients {
     return result;
   }
 
-
+/*
   public String notify( TransferDto transferDto ){
     String result = "";
     try {
@@ -100,11 +100,9 @@ public class AllClients {
     } catch (Exception e) {
       result = "Error: " + e.getMessage();
     }
-
-
     return result;
   }
-
+*/
 
 
 }
