@@ -6,7 +6,7 @@ public class ExchangeRateDto {
   private double value;
 
   public ExchangeRateDto(){}
-  
+
   public ExchangeRateDto(String title, String name, double value) {
     this.title = title;
     this.name = name;

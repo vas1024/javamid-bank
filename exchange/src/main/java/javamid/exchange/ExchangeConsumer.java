@@ -21,7 +21,7 @@ public class ExchangeConsumer {
 
     for (Object item : rates) {
       System.out.println("item is of Class:" + item.getClass());
-      System.out.print( item );
+      System.out.println( item );
 
     }
 

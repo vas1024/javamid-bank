@@ -20,3 +20,4 @@ data:
 
     spring.kafka.consumer.properties.spring.json.trusted.packages=*
     spring.kafka.consumer.properties.spring.json.value.default.type=java.util.List
+    spring.kafka.producer.properties.spring.json.add.type.headers=false
