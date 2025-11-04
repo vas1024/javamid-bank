@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.kafka.annotation.KafkaListener;
-
+/*
 @Component
 public class NotifyConsumer {
 
   private static final Logger log = LoggerFactory.getLogger(NotifyConsumer.class);
+
 
   @KafkaListener(topics = "notify")
   public void listen(String message) {
@@ -23,6 +24,8 @@ public class NotifyConsumer {
     // Ваша логика обработки уведомления
     processNotification(message);
   }
+
+ */
 
 
   private void processNotification(String message) {
