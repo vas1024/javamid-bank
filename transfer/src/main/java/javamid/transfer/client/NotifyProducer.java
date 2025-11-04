@@ -42,7 +42,7 @@ public class NotifyProducer  {
   public String notifyKafka(TransferDto transferDto) {
     try {
       CompletableFuture<SendResult<String, TransferDto>> future =
-              kafkaTemplate.send("transfer-notifications", transferDto);
+              kafkaTemplate.send("transfer", transferDto);
 
       // Ждем подтверждения с таймаутом
       SendResult<String, TransferDto> result = future.get(5, TimeUnit.SECONDS);
