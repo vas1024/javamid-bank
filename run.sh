@@ -14,4 +14,5 @@ docker build -t $SERVICE_NAME:latest .
 kind load docker-image $SERVICE_NAME:latest
 helm upgrade --install $SERVICE_NAME ./chart --force
 kubectl rollout restart deployment/$SERVICE_NAME
+kubectl rollout restart statefulset/$SERVICE_NAME
 cd ..
