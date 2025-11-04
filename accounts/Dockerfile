@@ -1,5 +1,5 @@
-#FROM eclipse-temurin:21-jdk-alpine
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-alpine
+#FROM openjdk:21-jdk-slim
 
 RUN apt-get update && \
     apt-get install -y curl netcat-openbsd && \
