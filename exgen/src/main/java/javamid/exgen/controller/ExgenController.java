@@ -4,6 +4,7 @@ import javamid.exgen.model.ExchangeRateDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -21,14 +22,17 @@ public class ExgenController {
   private final RestTemplate authRestTemplate;
   private final Random random = new Random();
   private final OAuth2AuthorizedClientManager clientManager;
+  private final KafkaTemplate<String, List<ExchangeRateDto>> kafkaTemplate;
 
   public ExgenController(
                           @Qualifier("plainRestTemplate") RestTemplate plainRestTemplate,
                           @Qualifier("authRestTemplate") RestTemplate authRestTemplate,
-                          OAuth2AuthorizedClientManager clientManager ){
+                          OAuth2AuthorizedClientManager clientManager,
+                          KafkaTemplate<String, List<ExchangeRateDto>> kafkaTemplate ){
     this.plainRestTemplate = plainRestTemplate;
     this.authRestTemplate = authRestTemplate;
     this.clientManager = clientManager;
+    this.kafkaTemplate = kafkaTemplate;
   }
 
   public List<ExchangeRateDto> getRates() {
@@ -90,10 +94,6 @@ public class ExgenController {
             .build();
     OAuth2AuthorizedClient client = clientManager.authorize(request);
     String accessToken = client.getAccessToken().getTokenValue();
-    System.out.println("🔐 ExGen получил токен: " + accessToken.substring(0, 20) + "...");
-    System.out.println("🔐 Полный токен: " + accessToken);
-    System.out.println("📋 Scope токена: " + client.getAccessToken().getScopes());
-    System.out.println("⏰ Expires at: " + client.getAccessToken().getExpiresAt());
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(accessToken);
@@ -113,8 +113,21 @@ public class ExgenController {
       e.printStackTrace();
     }
 
-    //String url = "http://gateway/exchange/api/bulk";
-    //restTemplate.postForObject(url, rates, Void.class);
+
+
+
+    try {
+      kafkaTemplate.send("rates", rates);
+
+      System.out.println("✅ " + rates.size() + " курсов отправлены в Kafka (at most once)");
+
+    } catch (Exception e) {
+      // At most once - не пытаемся повторить при ошибках
+      System.out.println("❌ Ошибка отправки: " + e.getMessage());
+    }
+
+
+
   }
 
 

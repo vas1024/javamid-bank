@@ -13,6 +13,17 @@ data:
     spring.security.oauth2.client.registration.exgen.scope=write
     spring.security.oauth2.client.provider.auth.token-uri=http://auth:8080/oauth2/token
 
+
+    spring.kafka.bootstrap-servers=kafka:9092
+    # At most once
+    spring.kafka.producer.acks=0
+    spring.kafka.producer.retries=0
+    # Ordered messages
+    spring.kafka.producer.properties.max.in.flight.requests.per.connection=1
+    # Serialization
+    spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+    spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+    spring.kafka.producer.properties.spring.json.add.type.headers=true
+
     
-    # Logging
-    # logging.level.com.bank.account={{ .Values.config.logging.level }}
+    
