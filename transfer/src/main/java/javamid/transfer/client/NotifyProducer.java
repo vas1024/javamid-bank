@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 public class NotifyProducer  {
 
   private final KafkaTemplate<String, TransferDto> kafkaTemplate;
-  private static final String TOPIC = "transfer-notifications";
+  private static final String TOPIC = "transfer";
 
   // Spring автоматически создаст KafkaTemplate на основе настроек в properties
   public NotifyProducer(KafkaTemplate<String, TransferDto> kafkaTemplate) {
