@@ -25,7 +25,7 @@ public class NotifyConsumer {
     processNotification(message);
   }
 
- */
+
 
 
   private void processNotification(String message) {
@@ -33,3 +33,5 @@ public class NotifyConsumer {
     log.info("Processing notification: {}", message);
   }
 }
+
+ */
