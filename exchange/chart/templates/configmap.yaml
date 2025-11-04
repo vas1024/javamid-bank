@@ -20,4 +20,5 @@ data:
 
     spring.kafka.consumer.properties.spring.json.trusted.packages=*
     spring.kafka.consumer.properties.spring.json.value.default.type=java.util.List
-    spring.kafka.producer.properties.spring.json.add.type.headers=false
+    spring.kafka.consumer.properties.spring.json.add.type.headers=false
+    #spring.kafka.consumer.properties.spring.json.type.mapping=ListExchangeRateDto:java.util.List<javamid.exchange.ExchangeRateDto>
