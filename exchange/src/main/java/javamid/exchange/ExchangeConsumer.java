@@ -2,6 +2,7 @@ package javamid.exchange;
 
 
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,7 @@ public class ExchangeConsumer {
   public ExchangeConsumer( ExchangeService exchangeService ) { this.exchangeService = exchangeService ; }
 
   @KafkaListener(topics = "rates", groupId = "exchange")
-  public void consumeRates(List<ExchangeRateDto> rates) {
+  public void consumeRates(@Payload List<ExchangeRateDto> rates) {
     System.out.println("✅ Получены курсы: " + rates.size() + " записей");
 
     for (Object item : rates) {
