@@ -2,6 +2,7 @@ global:
   imageTag: latest
   clusterName: kind-kind
   fullListOfServices: accounts,auth,blocker,cash,front,exchange,exgen,notify,transfer
+  fullListOfTools: kafka
 
 accounts:
   enabled: true

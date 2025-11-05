@@ -8,9 +8,10 @@ pipeline {
     stages {
 
 
-stage('Discover Services') {
+stage('Discover Services and Tools ') {
     steps {
         script {
+
             def servicesOutput = sh(
                 script: '''
                 grep "fullListOfServices" chart/values.yaml | awk -F: '{print $2}' | tr -d ' "'
@@ -19,6 +20,17 @@ stage('Discover Services') {
             ).trim()
             env.SERVICES = servicesOutput
             echo "Full list of services from values.yaml: ${env.SERVICES}"
+
+
+            def toolsOutput = sh(
+                script: '''
+                grep "fullListOfTools" chart/values.yaml | awk -F: '{print $2}' | tr -d ' "'
+                ''',
+                returnStdout: true
+            ).trim()
+            env.TOOLS = toolsOutput
+            echo "Full list of tools from values.yaml: ${env.TOOLS}"
+
         }
     }
 }
@@ -80,6 +92,56 @@ stage('Discover Services') {
             }
         }
         
+
+
+
+
+stage('Deploy Tools') {
+    when {
+        expression { env.TOOLS != null && !env.TOOLS.isEmpty() }
+    }
+    steps {
+        script {
+            echo "?? Deploying infrastructure tools..."
+            def tools = env.TOOLS.split(',')
+            
+            // Деплоим каждый инструмент параллельно
+            def deployStages = [:]
+            
+            tools.each { tool ->
+                deployStages["Deploy ${tool}"] = {
+                    script {
+                        if (fileExists("${tool}/chart/Chart.yaml")) {
+                            echo "?? Deploying ${tool}..."
+                            
+                            // Проверяем существование values.yaml
+                            def valuesFile = "${tool}/chart/values.yaml"
+                            def valuesArg = fileExists(valuesFile) ? "-f ${valuesFile}" : ""
+                            
+                            sh """
+                            helm upgrade --install ${tool} ${tool}/chart \
+                                --namespace default \
+                                --force \
+                                --wait \
+                                --timeout 5m \
+                                ${valuesArg}
+                            """
+                            echo "? ${tool} deployed successfully!"
+                        } else {
+                            echo "? No chart found for ${tool}, skipping deployment"
+                        }
+                    }
+                }
+            }
+            
+            parallel deployStages
+        }
+    }
+}
+
+
+
+
         stage('Deploy Services') {
             when {
                 expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
@@ -124,6 +186,7 @@ stage('Discover Services') {
             }
         }
         
+
         stage('Verify Deployment') {
             when {
                 expression { env.SERVICES != null && !env.SERVICES.isEmpty() }
@@ -131,17 +194,18 @@ stage('Discover Services') {
             steps {
                 script {
                     echo "?? Checking deployment status..."
-                    def services = env.SERVICES.split(',')
-                    
-                    services.each { service ->
+                    def services = env.SERVICES ? env.SERVICES.split(',') : []
+                    def tools = env.TOOLS ? env.TOOLS.split(',') : []
+                    def common = services + tools
+                    common.each { component ->
                         try {
-                            echo "Checking ${service}..."
+                            echo "Checking ${component}..."
                             sh """
-                            kubectl wait --for=condition=ready pod -l app=${service} --namespace default --timeout=60s
-                            echo "? ${service} is ready"
+                            kubectl wait --for=condition=ready pod -l app=${component} --namespace default --timeout=60s
+                            echo "? ${component} is ready"
                             """
                         } catch (Exception e) {
-                            echo "?? ${service} is not ready yet: ${e.message}"
+                            echo "?? ${component} is not ready yet: ${e.message}"
                         }
                     }
                     

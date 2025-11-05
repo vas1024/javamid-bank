@@ -22,22 +22,6 @@ public class NotifyProducer  {
     this.kafkaTemplate = kafkaTemplate;
   }
 
-  /*
-  public String notifyKafka(TransferDto transferDto) {
-    try {
-      // Отправляем сообщение в Kafka
-      SendResult<String, TransferDto> result = kafkaTemplate.send(TOPIC, transferDto).get();
-      return "Notification sent successfully to Kafka. Offset: " +
-              result.getRecordMetadata().offset();
-
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      return "Error sending to Kafka: " + e.getMessage();
-    }
-  }
-*/
-
-
 
   public String notifyKafka(TransferDto transferDto) {
     try {
