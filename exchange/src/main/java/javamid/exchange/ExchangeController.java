@@ -52,7 +52,7 @@ import java.util.Map;
 
 
 
-
+/*
     @PostMapping("/bulk")
     public void updateRatesBulk(@RequestBody List<ExchangeRateDto> currencyRates) {
       currencyRates.forEach(rateDto -> {
@@ -61,5 +61,6 @@ import java.util.Map;
         }
       });
     }
+*/
 
   }
