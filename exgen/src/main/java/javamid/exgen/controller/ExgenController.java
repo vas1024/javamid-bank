@@ -100,9 +100,9 @@ public class ExgenController {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<List<ExchangeRateDto>> entity = new HttpEntity<>(rates, headers);
 
+/*
     try {
       ResponseEntity<Void> response = plainRestTemplate.exchange(
-//              "http://gateway/exchange/api/bulk",
               "http://exchange:8080/api/bulk",
               HttpMethod.POST,
               entity,
@@ -111,8 +111,7 @@ public class ExgenController {
     } catch ( Exception e ) {
       System.out.println("❌ Общая ошибка: " + e.getMessage());
       e.printStackTrace();
-    }
-
+    }*/
 
 
 
