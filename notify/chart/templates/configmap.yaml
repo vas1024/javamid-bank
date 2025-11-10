@@ -38,3 +38,21 @@ data:
     spring.kafka.consumer.properties.spring.json.trusted.packages=*
     spring.kafka.consumer.properties.spring.json.use.type.headers=false
     spring.kafka.consumer.properties.spring.json.value.default.type: javamid.notify.model.TransferDto
+
+    # zipkin
+    management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans
+    management.tracing.sampling.probability=1
+    
+    spring.kafka.producer.observation-enabled=true
+    spring.kafka.consumer.observation-enabled=true
+    spring.kafka.listener.observation-enabled=true
+
+
+
+
+
+
+
+
+
+
