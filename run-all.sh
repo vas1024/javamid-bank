@@ -8,9 +8,10 @@ for SERVICE in "${SERVICES[@]}"; do
     mvn clean package -DskipTests
     docker build -t $SERVICE:latest .
     kind load docker-image $SERVICE:latest
+    kind load docker-image $SERVICE:latest
+    helm upgrade --install $SERVICE ./chart --force
+    kubectl rollout restart deployment/$SERVICE
+    kubectl rollout restart statefulset/$SERVICE
     cd ..
 done
 
-# Деплой umbrella
-helm dependency update ./chart
-helm upgrade --install bank ./chart
