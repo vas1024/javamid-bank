@@ -42,5 +42,22 @@
     </properties>
 
 
+    <dependencies>
+
+        <!-- zipkin -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+            <version>1.2.0</version> <!-- актуальная версия -->
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+            <version>2.16.4</version> <!-- актуальная версия -->
+        </dependency>
+
+
+    </dependencies>
+
 
 </project>
