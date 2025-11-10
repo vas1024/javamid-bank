@@ -27,8 +27,9 @@ public class RestTemplateConfig {
 
   // 🔓 Обычный RestTemplate для незащищенных endpoints
   @Bean("plainRestTemplate")
-    public RestTemplate plainRestTemplate() {
-    return new RestTemplate();
+  public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    RestTemplate restTemplate = builder.build();
+    return restTemplate;
   }
 
 
