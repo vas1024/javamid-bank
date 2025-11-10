@@ -24,7 +24,9 @@ data:
     management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans
     management.tracing.sampling.probability=1
     
-    management.observations.enable=true
+    management.observations.enabled=true
+    management.tracing.enabled=true
+    spring.datasource.tracing.enabled=true
 
     spring.kafka.producer.observation-enabled=true
     spring.kafka.consumer.observation-enabled=true
