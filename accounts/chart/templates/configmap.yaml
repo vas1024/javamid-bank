@@ -17,8 +17,6 @@ data:
     spring.jpa.hibernate.ddl-auto={{ .Values.config.jpa.ddlAuto }}
     spring.jpa.show-sql={{ .Values.config.jpa.showSql }}
     
-    # Logging
-    logging.level.com.bank.account={{ .Values.config.logging.level }}
 
     # Zipkin
     management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans
@@ -28,7 +26,16 @@ data:
     management.tracing.enabled=true
     spring.datasource.tracing.enabled=true
     management.metrics.enable.jdbc=true
+    management.metrics.enable.all=true
+    management.observations.datasource.enabled=true
+
 
     spring.kafka.producer.observation-enabled=true
     spring.kafka.consumer.observation-enabled=true
     spring.kafka.listener.observation-enabled=true
+
+    # Logging
+    logging.level.com.bank.account={{ .Values.config.logging.level }}
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+    logging.level.org.hibernate.SQL=DEBUG
