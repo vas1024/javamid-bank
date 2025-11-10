@@ -33,6 +33,7 @@ public class RestTemplateConfig {
 
 
 
+
   private String getAccessToken(OAuth2AuthorizedClientManager authorizedClientManager) {
     try {
       var request = org.springframework.security.oauth2.client.OAuth2AuthorizeRequest

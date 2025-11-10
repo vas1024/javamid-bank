@@ -15,10 +15,20 @@ public class RestTemplateConfig {
     this.tokenInterceptor = tokenInterceptor;
   }
 
+/*
   @Bean
   public RestTemplate restTemplate() {
     RestTemplate restTemplate = new RestTemplate();
     restTemplate.setInterceptors(Collections.singletonList(tokenInterceptor));
     return restTemplate;
+  }*/
+
+  @Bean
+  public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    RestTemplate restTemplate = bilder.build();
+    restTemplate.setInterceptors(Collections.singletonList(tokenInterceptor));
+    return restTemplate;
   }
+
+
 }
