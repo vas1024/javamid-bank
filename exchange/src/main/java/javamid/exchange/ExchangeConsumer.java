@@ -1,6 +1,8 @@
 package javamid.exchange;
 
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -17,8 +19,14 @@ public class ExchangeConsumer {
 
   private final ExchangeService exchangeService;
   private final ObjectMapper objectMapper = new ObjectMapper();
-
-  public ExchangeConsumer( ExchangeService exchangeService ) { this.exchangeService = exchangeService ; }
+  private final MeterRegistry meterRegistry;
+  private Timer.Sample delayMetricTimer ;
+  public ExchangeConsumer( ExchangeService exchangeService,
+                           MeterRegistry meterRegistry ) {
+    this.exchangeService = exchangeService ;
+    this.meterRegistry = meterRegistry;
+    this.delayMetricTimer = Timer.start(meterRegistry);
+  }
 
 
   @KafkaListener(topics = "rates", groupId = "exchange")
@@ -29,7 +37,10 @@ public class ExchangeConsumer {
               new TypeReference<List<ExchangeRateDto>>() {}
       );
 
+      delayMetricTimer.stop( meterRegistry.timer("bank_exchange_rates_update") );
       System.out.println("✅ Получены курсы: " + rates.size() + " записей");
+      delayMetricTimer = Timer.start(meterRegistry);
+
 
       for (ExchangeRateDto rate : rates) {
         System.out.println(rate.getTitle() + " (" + rate.getName() + "): " + rate.getValue());

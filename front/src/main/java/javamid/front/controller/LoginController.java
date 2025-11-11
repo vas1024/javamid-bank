@@ -1,5 +1,6 @@
 package javamid.front.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,10 +28,13 @@ public class LoginController {
 
   private final RestTemplate restTemplate;
   private final AuthUtils authUtils;
+  private final MeterRegistry meterRegistry;
   public LoginController(RestTemplate restTemplate,
-                         AuthUtils authUtils) {
+                         AuthUtils authUtils,
+                         MeterRegistry meterRegistry ) {
     this.restTemplate = restTemplate;
     this.authUtils = authUtils;
+    this.meterRegistry = meterRegistry;
   }
 
 
@@ -78,11 +82,15 @@ public class LoginController {
         authCookie.setMaxAge(3600); // 1 час
         response.addCookie(authCookie);
 
+        meterRegistry.counter("bank_login_success",    "username", username ).increment();
+
         return "redirect:/" + userId;
       }
     } catch (Exception e) {
       // Логируем ошибку
     }
+
+    meterRegistry.counter("bank_login_fail",    "username", username ).increment();
 
     return "redirect:/login?error";
   }

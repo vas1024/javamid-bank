@@ -42,7 +42,7 @@ public class SecurityConfig {
 //            .addFilterBefore(new RequestDebugFilter(), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/signup", "/login", "/error", "/css/**", "/js/**", "/api/rates").permitAll()
+                    .requestMatchers("/", "/signup", "/login", "/error", "/actuator/**",  "/api/rates").permitAll()
                     .requestMatchers("/api/notifications/*").access(this::checkUserAccess)
                     .requestMatchers("/user/*/**").access(this::checkUserAccess)
                     .requestMatchers("/*").access(this::checkUserAccess)

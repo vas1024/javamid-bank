@@ -23,4 +23,8 @@ data:
     spring.kafka.producer.observation-enabled=true
     spring.kafka.consumer.observation-enabled=true
     spring.kafka.listener.observation-enabled=true
+
+    # Prometheus
+    management.endpoints.web.exposure.include=*
+
     

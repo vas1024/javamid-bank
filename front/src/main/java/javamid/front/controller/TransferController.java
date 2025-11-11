@@ -1,5 +1,6 @@
 package javamid.front.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import javamid.front.model.CashDto;
 import javamid.front.model.TransferDto;
@@ -22,11 +23,13 @@ public class TransferController {
 
   private final RestTemplate restTemplate;
   private final AuthUtils authUtils;
-
+  private final MeterRegistry meterRegistry;
   public TransferController(RestTemplate restTemplate,
-                            AuthUtils authUtils) {
+                            AuthUtils authUtils,
+                            MeterRegistry meterRegistry ) {
     this.restTemplate = restTemplate;
     this.authUtils = authUtils;
+    this.meterRegistry = meterRegistry;
   }
 
   @PostMapping("/user/{id}/transfer")
@@ -81,18 +84,35 @@ public class TransferController {
       result = response.getBody();
 
       if (result != null && result.startsWith("Error")) {
+        meterRegistry.counter("bank_transfer_fail",
+                "from_user", transferDto.getUserIdFrom().toString(),
+                "to_user", transferDto.getUserIdTo().toString(),
+                "from_account", transferDto.getCurrencyFrom(),
+                "to_account", transferDto.getCurrencyTo()
+        ).increment();
         redirectAttributes.addFlashAttribute("transferErrors", result);
         return "redirect:/" + id;
       }
 
+
     } catch (Exception e) {
+      meterRegistry.counter("bank_transfer_fail",
+              "from_user", transferDto.getUserIdFrom().toString(),
+              "to_user", transferDto.getUserIdTo().toString(),
+              "from_account", transferDto.getCurrencyFrom(),
+              "to_account", transferDto.getCurrencyTo()
+      ).increment();
       redirectAttributes.addFlashAttribute("transferErrors", e);
       return "redirect:/" + id;
     }
 
 
-
-//    redirectAttributes.addFlashAttribute("transferOtherErrors", "unknown action" );
+    meterRegistry.counter("bank_transfer_success",
+            "from_user", transferDto.getUserIdFrom().toString(),
+            "to_user", transferDto.getUserIdTo().toString(),
+            "from_account", transferDto.getCurrencyFrom(),
+            "to_account", transferDto.getCurrencyTo()
+    ).increment();
 
     String message = "зачислено " + result + " " + to_currency ;
     redirectAttributes.addFlashAttribute("message", message );
