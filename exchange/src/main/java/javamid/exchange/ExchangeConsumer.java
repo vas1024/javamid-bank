@@ -1,6 +1,7 @@
 package javamid.exchange;
 
 
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,12 +21,18 @@ public class ExchangeConsumer {
   private final ExchangeService exchangeService;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final MeterRegistry meterRegistry;
-  private Timer.Sample delayMetricTimer ;
+  private Timer.Sample delayMetricTimer;
+  private final Gauge delayGauge;
+  private long lastUpdateTime;
   public ExchangeConsumer( ExchangeService exchangeService,
                            MeterRegistry meterRegistry ) {
     this.exchangeService = exchangeService ;
     this.meterRegistry = meterRegistry;
     this.delayMetricTimer = Timer.start(meterRegistry);
+    lastUpdateTime = System.currentTimeMillis()/1000;
+    delayGauge = Gauge.builder( "bank_exchange_rate_last_update_time", this, consumer -> consumer.lastUpdateTime )
+            .description("Timestamp of last exchange rate update")
+            .register(meterRegistry);
   }
 
 
@@ -37,9 +44,11 @@ public class ExchangeConsumer {
               new TypeReference<List<ExchangeRateDto>>() {}
       );
 
+
       delayMetricTimer.stop( meterRegistry.timer("bank_exchange_rates_update") );
       System.out.println("✅ Получены курсы: " + rates.size() + " записей");
       delayMetricTimer = Timer.start(meterRegistry);
+      lastUpdateTime = System.currentTimeMillis()/1000;
 
 
       for (ExchangeRateDto rate : rates) {
