@@ -88,6 +88,14 @@
 		</dependency>
 		<!-- end of zipkin -->
 
+		<!-- prometheus -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<!-- end of prometheus -->
+
+
 	</dependencies>
 
 	<dependencyManagement>
