@@ -3,6 +3,8 @@ kind: ServiceMonitor
 metadata:
   name: bank-services
   namespace: default
+  labels:
+    release: prometheus
 spec:
   selector: {}
 #  selector:
