@@ -5,7 +5,8 @@ metadata:
 spec:
   clusterIP: None  
   ports:
-  - port: {{ .Values.service.port }}
+  - name: http
+    port: {{ .Values.service.port }}
     targetPort: {{ .Values.config.serverPort }}
   selector:
     app: {{ .Chart.Name }}

@@ -6,10 +6,10 @@ metadata:
   labels:
     release: prometheus
 spec:
-#  selector: {}
-  selector:
-    matchLabels:
-      app.kubernetes.io/managed-by: Helm
+  selector: {}
+#  selector:
+#    matchLabels:
+#      app.kubernetes.io/managed-by: Helm
   endpoints:
   - port: http
     path: /actuator/prometheus
