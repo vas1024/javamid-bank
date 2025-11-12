@@ -10,7 +10,7 @@ spec:
     - name: bank
       rules:
         - alert:  exchangeRateUpdateMissing
-          expr: bank_exchange_rates_update_seconds_max > 15
+          expr: bank_exchange_rate_seconds_since_last_update > 15
           labels:
             severity: warning                   
           annotations:
