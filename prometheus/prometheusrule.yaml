@@ -4,7 +4,7 @@ metadata:
   name: exchange-rate-update-missing
 #  namespace: monitoring # Неймспейс, в котором работает Prometheus
   labels:
-    release: prometheus-stack  # Название релиза Prometheus
+    release: prometheus  # Название релиза Prometheus 
 spec:
   groups:
     - name: bank
