@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: exchangeRateUpdateMissing
+  name: exchange-rate-update-missing
 #  namespace: monitoring # Неймспейс, в котором работает Prometheus
   labels:
     release: prometheus-stack  # Название релиза Prometheus
