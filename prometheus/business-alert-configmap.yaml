@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-business-alerts
+  labels:
+    role: alert-rules  
+data:
+  business-alerts.yaml: |-
+    groups:
+    - name: business.metrics
+      rules:
+      - alert: exchangeRateUpdateMissing
+        expr: bank_exchange_rates_update_seconds_max > 15
+        labels:
+          severity: warning
+        annotations:
+          summary: "exchange rate was not updated in time"
