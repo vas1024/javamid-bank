@@ -9,7 +9,7 @@ data:
     groups:
     - name: business.metrics
       rules:
-      - alert: exchangeRateUpdateMissing
+      - alert: exchange-rate-update-missing
         expr: bank_exchange_rates_update_seconds_max > 15
         labels:
           severity: warning
