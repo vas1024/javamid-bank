@@ -15,8 +15,7 @@ spec:
     path: /actuator/prometheus
     interval: 15s
     relabelings:
-    - source_labels: [__meta_kubernetes_service_name]
-      target_label: service
-    - source_labels: [__meta_kubernetes_pod_name]
-      target_label: pod
-
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
