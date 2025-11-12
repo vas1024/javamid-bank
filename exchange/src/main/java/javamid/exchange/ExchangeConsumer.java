@@ -29,9 +29,10 @@ public class ExchangeConsumer {
     this.exchangeService = exchangeService ;
     this.meterRegistry = meterRegistry;
     this.delayMetricTimer = Timer.start(meterRegistry);
-    lastUpdateTime = System.currentTimeMillis()/1000;
-    delayGauge = Gauge.builder( "bank_exchange_rate_last_update_time", this, consumer -> consumer.lastUpdateTime )
-            .description("Timestamp of last exchange rate update")
+    lastUpdateTime = System.currentTimeMillis();
+    delayGauge = Gauge.builder( "bank_exchange_rate_seconds_since_last_update", this, consumer ->
+            ( System.currentTimeMillis() -  consumer.lastUpdateTime )  / 1000 )
+            .description("Number of seconds since last update of exchange rates in bank application")
             .register(meterRegistry);
   }
 
@@ -48,7 +49,7 @@ public class ExchangeConsumer {
       delayMetricTimer.stop( meterRegistry.timer("bank_exchange_rates_update") );
       System.out.println("✅ Получены курсы: " + rates.size() + " записей");
       delayMetricTimer = Timer.start(meterRegistry);
-      lastUpdateTime = System.currentTimeMillis()/1000;
+      lastUpdateTime = System.currentTimeMillis();
 
 
       for (ExchangeRateDto rate : rates) {
