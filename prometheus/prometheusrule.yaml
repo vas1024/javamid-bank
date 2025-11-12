@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: exchangeRateUpdateMissing
+#  namespace: monitoring # Неймспейс, в котором работает Prometheus
+  labels:
+    release: prometheus-stack  # Название релиза Prometheus
+spec:
+  groups:
+    - name: bank
+      rules:
+        - alert:  exchangeRateUpdateMissing
+          expr: bank_exchange_rates_update_seconds_max > 15
+          labels:
+            severity: warning                   
+          annotations:
+            summary: "Exchange rate was not updated in time"
+            description: "Exchange rate should be updated every ten seconds."
