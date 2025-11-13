@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 0,
+  "id": 31,
   "links": [],
   "panels": [
     {
@@ -383,12 +383,12 @@
     "list": []
   },
   "time": {
-    "from": "2025-11-12T12:29:11.864Z",
-    "to": "2025-11-12T13:08:13.980Z"
+    "from": "now-15m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "business metrics",
-  "uid": "ad75zkc",
-  "version": 5
+  "uid": "ad75zkcaa",
+  "version": 1
 }
