@@ -49,5 +49,3 @@ data:
     # Prometheus
     management.endpoints.web.exposure.include=*
 
-    # ELK
-    logging.config=classpath:log4j2.xml
