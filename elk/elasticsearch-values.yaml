@@ -1,0 +1,9 @@
+image: "elasticsearch"
+imageTag: "9.1.7"
+imagePullPolicy: "Never"
+
+replicas: 1
+
+esConfig:
+  elasticsearch.yml: |
+    discovery.type: single-node
