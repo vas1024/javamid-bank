@@ -16,3 +16,18 @@ spec:
           annotations:
             summary: "Exchange rate was not updated in time"
             description: "Exchange rate should be updated every ten seconds."
+
+        - alert: UserLoginFailuresHigh
+          expr: |
+            sum by (username) (
+              rate(bank_login_fail_total[1m]) * 60
+            ) > 3
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "User {{ $labels.username }} has too many failed logins"
+            description: "User {{ $labels.username }} has {{ $value | humanize }} failed login attempts in the last minute"
+        
+
+
