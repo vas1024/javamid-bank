@@ -47,5 +47,5 @@ data:
     spring.kafka.listener.observation-enabled=true
 
     # Prometheus
-    management.endpoints.web.exposure.include=*
+#    management.endpoints.web.exposure.include=*
 

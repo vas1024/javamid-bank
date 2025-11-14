@@ -28,7 +28,10 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<spring-boot.excludeArtifacts>spring-boot-starter-logging</spring-boot.excludeArtifacts>
 	</properties>
+
+
 	<dependencies>
 
 		<dependency>
@@ -115,6 +118,7 @@
 		<!-- end of elk -->
 
 	</dependencies>
+
 
 	<dependencyManagement>
 		<dependencies>
