@@ -1,30 +1,17 @@
 image: "elasticsearch"
-imageTag: "9.1.7"
+imageTag: "8.11.0"
 imagePullPolicy: "Never"
 
 replicas: 1
 
-readinessProbe:
-  enabled: false
-livenessProbe: 
-  enabled: false
-
 esConfig:
   elasticsearch.yml: |
     discovery.type: single-node
-    xpack.security.enabled: false
-    xpack.security.http.ssl:
-      enabled: false
-    xpack.security.transport.ssl:
-      enabled: false
 
+esJavaOpts: "-Xms512m -Xmx512m"
 
-extraEnvs:
-  - name: "discovery.type"
-    value: "single-node"
-  - name: "xpack.security.enabled"
-    value: "false"
-  - name: "xpack.security.http.ssl.enabled"
-    value: "false"
-  - name: "xpack.security.transport.ssl.enabled"
-    value: "false"
+readinessProbe:
+  enabled: false
+livenessProbe:
+  enabled: false
+
