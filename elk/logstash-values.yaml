@@ -21,12 +21,6 @@ logstashPipeline:
         match => { "message" => "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:log_message}" }
       }
       
-      mutate {
-        add_field => { 
-          "service" => "accounts"
-          "environment" => "production" 
-        }
-      }
     }
     
     output {
