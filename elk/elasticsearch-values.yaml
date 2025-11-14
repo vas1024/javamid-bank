@@ -4,6 +4,11 @@ imagePullPolicy: "Never"
 
 replicas: 1
 
-esConfig:
-  elasticsearch.yml: |
-    discovery.type: single-node
+readinessProbe:
+  enabled: false
+livenessProbe: 
+  enabled: false
+
+
+
+
