@@ -1,5 +1,5 @@
-docker pull logstash:7.17.3
-kind load docker-image logstash:7.17.3
+docker pull logstash:9.1.7
+kind load docker-image logstash:9.1.7
 docker pull elasticsearch:9.1.7
 kind load docker-image elasticsearch:9.1.7
 docker pull kibana:9.1.7     

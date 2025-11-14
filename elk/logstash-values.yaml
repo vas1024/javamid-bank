@@ -5,9 +5,8 @@ imagePullPolicy: Never
 replicas: 1
 
 logstashConfig:
-  logstash.yml: |
-    http.host: "0.0.0.0"
-    xpack.monitoring.enabled: false
+#  logstash.yml: |
+#    xpack.monitoring.enabled: false
   logstash.conf: |
     input {
       kafka {
