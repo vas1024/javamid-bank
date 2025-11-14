@@ -30,11 +30,6 @@ logstashPipeline:
     }
     
     output {
-      elasticsearch {
-        hosts => ["http://elasticsearch-master:9200"]
-        index => "app-logs-%{+YYYY.MM.dd}"
-      }
-      
       stdout { 
         codec => rubydebug 
       }
