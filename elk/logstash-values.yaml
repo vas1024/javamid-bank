@@ -34,7 +34,7 @@ logstashPipeline:
       elasticsearch {
         hosts => ["http://elasticsearch:9200"]  
         index => "app-logs-%{+YYYY.MM.dd}"
-        ssl => false
+        ssl_enabled => false
         ssl_verification_mode => "none" 
       }
   
