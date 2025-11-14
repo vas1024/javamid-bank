@@ -10,20 +10,37 @@ logstashConfig:
     xpack.monitoring.enabled: false
   logstash.conf: |
     input {
-      beats {
-        port => 5044
-      }
-      tcp {
-        port => 5000
-        codec => json
+      kafka {
+        bootstrap_servers => "kafka:9092"
+        topics => ["logs"]
+        codec => "plain"
+        group_id => "logstash"
+        auto_offset_reset => "earliest"
       }
     }
+    
+    filter {
+      grok {
+        match => { "message" => "%{TIMESTAMP_ISO8601:timestamp} %{GREEDYDATA:log_message}" }
+      }
+      
+      mutate {
+        add_field => { 
+          "service" => "accounts"
+          "environment" => "production" 
+        }
+      }
+    }
+    
     output {
       elasticsearch {
         hosts => ["http://elasticsearch-master:9200"]
-        index => "logs-%{+YYYY.MM.dd}"
+        index => "app-logs-%{+YYYY.MM.dd}"
       }
-      stdout {
-        codec => rubydebug
+      
+      stdout { 
+        codec => rubydebug 
       }
-   }
+    }
+
+
