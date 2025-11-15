@@ -9,7 +9,7 @@
             <PatternLayout pattern="%date %message"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%X{service_name}] %msg%n"/>
             </!-->
-            <PatternLayout pattern='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}", "service":"accounts", "level":"%p", "message":"%m"}%n'/>
+            <PatternLayout pattern='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}", "service":"cash", "level":"%p", "message":"%m"}%n'/>
             <Property name="bootstrap.servers">kafka:9092</Property>
             <Property name="linger.ms">1000</Property>
         </Kafka>
