@@ -6,6 +6,54 @@
 на линукс компе установлен дженкинс, докер, кинд, хелм
 
 
+проброс портов
+
+kubectl port-forward service/front 8080:8080 --address 0.0.0.0   # это само приложение Банк
+kubectl port-forward service/zipkin 9411:9411 --address 0.0.0.0
+kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9092:9090 --address 0.0.0.0
+kubectl port-forward svc/prometheus-grafana 3000:80 --address 0.0.0.0
+kubectl port-forward svc/prometheus-kube-prometheus-alertmanager 9093:9093 --address 0.0.0.0
+kubectl port-forward pod/logstash-logstash-0 5044:5044
+kubectl port-forward svc/elasticsearch-master 9200:9200 --address 0.0.0.0
+kubectl port-forward svc/kibana 5601:5601 --address 0.0.0.0
+
+
+zipkin 
+рисует красивую схему взаимодействия между сервисами
+см недоделки
+
+
+prometheus, grafana
+
+
+
+ELK, log4j2
+возникли трудности с установкой из еластик репозитория,
+придумал такой путь
+  docker pull образ с докерхаба
+  kind load загрузка образа в кинд
+  git clone https://github.com/elastic/helm-charts.git
+  helm install logstash ./helm-charts/logstash -f ./logstash-values.yaml
+но получилось это только с логстешем. 
+долго бился чтобы запустить официальным чартом еластик на одной ноде, и так и не смог,
+кибана вообще не хотела не только ставиться но даже и удаляться.
+для установки еластика и кибаны самописный стс и деплой с сервисами.
+
+в конфиге log4j2 захардкодено имя микросервиса, у меня основная переменная с именем service.name из application.properties
+но она не может быть применена, так как log4j2.xml читается до application.properties при старте приложения
+
+для правильного логирования мешался logback, зависимость с ним тянется с spring-boot-starter-web
+по этому пришлось добавить exclusion spring-boot-starter-logging  в пом
+
+для передачи логов используется топик кафка по имени logs
+
+
+
+
+
+
+
+
 порядок ручного деплоя
 
 git pull
@@ -149,6 +197,7 @@ kubectl logs test-bank-actuators
 
 недоделки
 
+zipkin - нет трейсов от обращений к бд, нет трейсов от записи в кафка ( от чтения из кафки есть )
 
 
 
