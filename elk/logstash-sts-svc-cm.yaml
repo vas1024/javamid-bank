@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash
+spec:
+  serviceName: logstash
+  replicas:  1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: logstash:9.1.7
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5044
+        - containerPort: 9600
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/pipeline/
+        - name: logstash-data
+          mountPath: /usr/share/logstash/data/
+        env:
+        - name: XPACK_MONITORING_ENABLED
+          value: "false"
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-config
+  volumeClaimTemplates:
+  - metadata:
+      name: logstash-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10GiapiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logstash
+spec:
+  serviceName: logstash
+  replicas:  1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: logstash:9.1.7
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5044
+        - containerPort: 9600
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/pipeline/
+        - name: logstash-data
+          mountPath: /usr/share/logstash/data/
+        env:
+        - name: XPACK_MONITORING_ENABLED
+          value: "false"
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-config
+  volumeClaimTemplates:
+  - metadata:
+      name: logstash-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+  - port: 5044
+    targetPort: 5044
+    name: beats
+  - port: 9600
+    targetPort: 9600
+    name: api
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  logstash.conf: |
+    input {
+      kafka {
+        bootstrap_servers => "kafka:9092"
+        topics => ["logs"]
+        codec => "plain"
+        group_id => "logstash"
+        auto_offset_reset => "earliest"
+      }
+    }
+    
+    filter {
+      json {
+        source => "message"
+      }
+    }
+    
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:9200"]  
+        index => "app-logs-%{+YYYY.MM.dd}"
+        ssl_enabled => false
+        ssl_verification_mode => "none" 
+      }
+      stdout { 
+        codec => rubydebug 
+      }
+    }

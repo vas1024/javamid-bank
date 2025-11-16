@@ -55,7 +55,7 @@ stage('Discover Services and Tools and Monitoring ') {
                     echo "?? Validating Helm charts..."
                     def services = env.SERVICES.split(',')
                     
-                    // Проверяем существование chart'ов перед валидацией
+                    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ chart'РѕРІ РїРµСЂРµРґ РІР°Р»РёРґР°С†РёРµР№
                     services.each { service ->
                         if (fileExists("${service}/chart/Chart.yaml")) {
                             echo "Validating ${service} chart..."
@@ -76,7 +76,7 @@ stage('Discover Services and Tools and Monitoring ') {
                 script {
                     def services = env.SERVICES.split(',')
                     
-                    // Собираем все сервисы параллельно
+                    // РЎРѕР±РёСЂР°РµРј РІСЃРµ СЃРµСЂРІРёСЃС‹ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ
                     def buildStages = [:]
                     
                     services.each { service ->
@@ -84,7 +84,7 @@ stage('Discover Services and Tools and Monitoring ') {
                             dir(service) {
                                 echo "??? Building ${service}..."
                                 
-                                // Проверяем существование pom.xml перед сборкой
+                                // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ pom.xml РїРµСЂРµРґ СЃР±РѕСЂРєРѕР№
                                 if (fileExists('pom.xml')) {
                                     sh "mvn clean package -DskipTests"
                                     sh "docker build -t ${service}:latest ."
@@ -115,7 +115,7 @@ stage('Deploy Tools') {
             echo "Deploying infrastructure tools..."
             def tools = env.TOOLS.split(',')
             
-            // Деплоим каждый инструмент параллельно
+            // Р”РµРїР»РѕРёРј РєР°Р¶РґС‹Р№ РёРЅСЃС‚СЂСѓРјРµРЅС‚ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ
             def deployStages = [:]
             
             tools.each { tool ->
@@ -124,7 +124,7 @@ stage('Deploy Tools') {
                         if (fileExists("${tool}/chart/Chart.yaml")) {
                             echo "?? Deploying ${tool}..."
                             
-                            // Проверяем существование values.yaml
+                            // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ values.yaml
                             def valuesFile = "${tool}/chart/values.yaml"
                             def valuesArg = fileExists(valuesFile) ? "-f ${valuesFile}" : ""
                             
@@ -161,7 +161,7 @@ stage('Deploy Tools') {
                     echo "Deploying services individually..."
                     def services = env.SERVICES.split(',')
                     
-                    // Деплоим каждый сервис параллельно
+                    // Р”РµРїР»РѕРёРј РєР°Р¶РґС‹Р№ СЃРµСЂРІРёСЃ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ
                     def deployStages = [:]
                     
                     services.each { service ->
@@ -170,7 +170,7 @@ stage('Deploy Tools') {
                                 if (fileExists("${service}/chart/Chart.yaml")) {
                                     echo "?? Deploying ${service}..."
                                     
-                                    // Проверяем существование values.yaml
+                                    // РџСЂРѕРІРµСЂСЏРµРј СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ values.yaml
                                     def valuesFile = "${service}/chart/values.yaml"
                                     def valuesArg = fileExists(valuesFile) ? "-f ${valuesFile}" : ""
                                     
@@ -259,7 +259,7 @@ stage('Deploy Monitoring') {
                         }
                     }
                     
-                    // Показываем общий статус
+                    // РџРѕРєР°Р·С‹РІР°РµРј РѕР±С‰РёР№ СЃС‚Р°С‚СѓСЃ
                     sh "kubectl get pods -l app -n default --no-headers | wc -l"
                     sh "kubectl get deployments -n default"
                 }
@@ -280,7 +280,7 @@ stage('Smoke Tests') {
             
             def services = env.SERVICES.split(',')
             
-            // Каждая команда curl независима (через ; вместо &&)
+            // РљР°Р¶РґР°СЏ РєРѕРјР°РЅРґР° curl РЅРµР·Р°РІРёСЃРёРјР° (С‡РµСЂРµР· ; РІРјРµСЃС‚Рѕ &&)
             def curlCommands = services.collect { service ->
                 """
                 echo "Testing ${service}..."
@@ -338,13 +338,13 @@ stage('Smoke Tests') {
     post {
         always {
             echo "?? Build ${currentBuild.result} - ${env.BUILD_URL}"
-            // Очистка тестовых ресурсов
+            // РћС‡РёСЃС‚РєР° С‚РµСЃС‚РѕРІС‹С… СЂРµСЃСѓСЂСЃРѕРІ
 //            sh "kubectl delete pod --field-selector=status.phase==Succeeded -n default --ignore-not-found=true"
 //            sh "kubectl delete pod -l run=smoke-test -n default --ignore-not-found=true"
         }
         success {
             echo "?? All services deployed successfully!"
-            // Показываем финальный статус
+            // РџРѕРєР°Р·С‹РІР°РµРј С„РёРЅР°Р»СЊРЅС‹Р№ СЃС‚Р°С‚СѓСЃ
             sh "kubectl get pods -n default"
             sh "kubectl get services -n default"
         }
