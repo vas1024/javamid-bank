@@ -8,9 +8,6 @@ pipeline {
         )
     }
 	
-	environment {
-        NAMESPACE = 'default'
-    }
 	
     agent any
     options {
