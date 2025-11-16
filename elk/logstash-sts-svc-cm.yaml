@@ -39,50 +39,10 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 10GiapiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: logstash
-spec:
-  serviceName: logstash
-  replicas:  1
-  selector:
-    matchLabels:
-      app: logstash
-  template:
-    metadata:
-      labels:
-        app: logstash
-    spec:
-      containers:
-      - name: logstash
-        image: logstash:9.1.7
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 5044
-        - containerPort: 9600
-        volumeMounts:
-        - name: logstash-config
-          mountPath: /usr/share/logstash/pipeline/
-        - name: logstash-data
-          mountPath: /usr/share/logstash/data/
-        env:
-        - name: XPACK_MONITORING_ENABLED
-          value: "false"
-      volumes:
-      - name: logstash-config
-        configMap:
-          name: logstash-config
-  volumeClaimTemplates:
-  - metadata:
-      name: logstash-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
           storage: 10Gi
 
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
