@@ -8,7 +8,7 @@ pipeline {
     stages {
 
 
-stage('Discover Services and Tools ') {
+stage('Discover Services and Tools and Monitoring ') {
     steps {
         script {
 
@@ -30,6 +30,16 @@ stage('Discover Services and Tools ') {
             ).trim()
             env.TOOLS = toolsOutput
             echo "Full list of tools from values.yaml: ${env.TOOLS}"
+
+
+            def monitoringOutput = sh(
+                script: '''
+                grep "fullListOfMonitoring" chart/values.yaml | awk -F: '{print $2}' | tr -d ' "'
+                ''',
+                returnStdout: true
+            ).trim()
+            env.MONITORING = monitoringOutput
+            echo "Full list of monitoring from values.yaml: ${env.MONITORING}"
 
         }
     }
@@ -102,7 +112,7 @@ stage('Deploy Tools') {
     }
     steps {
         script {
-            echo "?? Deploying infrastructure tools..."
+            echo "Deploying infrastructure tools..."
             def tools = env.TOOLS.split(',')
             
             // Деплоим каждый инструмент параллельно
@@ -126,9 +136,9 @@ stage('Deploy Tools') {
                                 --timeout 5m \
                                 ${valuesArg}
                             """
-                            echo "? ${tool} deployed successfully!"
+                            echo "${tool} deployed successfully!"
                         } else {
-                            echo "? No chart found for ${tool}, skipping deployment"
+                            echo "No chart found for ${tool}, skipping deployment"
                         }
                     }
                 }
@@ -148,7 +158,7 @@ stage('Deploy Tools') {
             }
             steps {
                 script {
-                    echo "?? Deploying services individually..."
+                    echo "Deploying services individually..."
                     def services = env.SERVICES.split(',')
                     
                     // Деплоим каждый сервис параллельно
@@ -173,9 +183,9 @@ stage('Deploy Tools') {
                                         --timeout 3m \
                                         ${valuesArg}
                                     """
-                                    echo "? ${service} deployed successfully!"
+                                    echo "${service} deployed successfully!"
                                 } else {
-                                    echo "?? No chart found for ${service}, skipping deployment"
+                                    echo "No chart found for ${service}, skipping deployment"
                                 }
                             }
                         }
@@ -186,6 +196,46 @@ stage('Deploy Tools') {
             }
         }
         
+
+
+stage('Deploy Monitoring') {
+    when {
+        expression { env.MONITORING != null && !env.MONITORING.isEmpty() }
+    }
+    steps {
+        script {
+            echo "Deploying monitoring tools..."
+            def monitoringTools = env.MONITORING.split(',')
+            
+            def monitoringStages = [:]
+            monitoringTools.each { tool ->
+                monitoringStages["Deploy ${tool}"] = {
+                    script {
+                        if (fileExists("${tool}/run.sh")) {
+                            echo "Deploying ${tool} monitoring..."
+                            
+                            dir("${tool}") {
+                                sh """
+                                chmod +x run.sh
+                                ./run.sh
+                                """
+                            }
+                            echo "${tool} monitoring deployed successfully!"
+                        } else {
+                            echo "No run.sh found for ${tool}, skipping deployment"
+                        }
+                    }
+                }
+            }
+            
+            parallel monitoringStages
+        }
+    }
+}
+
+
+
+
 
         stage('Verify Deployment') {
             when {

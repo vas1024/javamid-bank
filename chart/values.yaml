@@ -3,6 +3,7 @@ global:
   clusterName: kind-kind
   fullListOfServices: accounts,auth,blocker,cash,front,exchange,exgen,notify,transfer
   fullListOfTools: kafka
+  fullListOfMonitoring: zipkin, prometheus, elk
 
 accounts:
   enabled: true
