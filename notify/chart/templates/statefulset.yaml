@@ -27,6 +27,8 @@ spec:
         env:
         - name: SPRING_CONFIG_LOCATION
           value: file:/app/config/application.properties
+        - name: SERVICE_NAME
+          value: "{{ .Chart.Name }}"  
       volumes:
       - name: config-volume
         configMap:

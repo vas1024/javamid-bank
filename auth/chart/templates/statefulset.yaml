@@ -29,6 +29,8 @@ spec:
         env:
         - name: SPRING_CONFIG_LOCATION
           value: file:/app/config/application.properties
+        - name: SERVICE_NAME
+          value: "{{ .Chart.Name }}"  
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:

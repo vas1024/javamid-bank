@@ -22,6 +22,8 @@ spec:
         env:
         - name: KAFKA_CLUSTER_ID
           value: {{ .Values.clusterId }}
+        - name: SERVICE_NAME
+          value: "{{ .Chart.Name }}"  
         volumeMounts:
         - name: data
           mountPath: /kafka/data
