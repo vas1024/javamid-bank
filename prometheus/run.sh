@@ -12,5 +12,6 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 
 kubectl apply -f servicemonitor.yaml
 kubectl apply -f prometheusrule.yaml
+kubectl apply -f grafana-dashboard-configmap.yaml
 
 export GRAFANA_PW=`kubectl --namespace default get secrets prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo`
