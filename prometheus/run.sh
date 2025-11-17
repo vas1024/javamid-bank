@@ -4,9 +4,10 @@ helm repo update prometheus-community
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
   --namespace $NAMESPACE \
   --set admissionWebhooks.enabled=false \
+  --set prometheusOperator.admissionWebhooks.enabled=false \
   --set grafana.sidecar.dashboards.enabled=true \
   --set grafana.sidecar.dashboards.label=grafana_dashboard \
-  --set grafana.adminPassword=admin
+  --set grafana.adminPassword=admin \
   --set kubeStateMetrics.enabled=false \
   --set nodeExporter.enabled=false \
   --set prometheus-node-exporter.enabled=false \
