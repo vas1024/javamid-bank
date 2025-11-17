@@ -70,16 +70,17 @@ data:
       kafka {
         bootstrap_servers => "kafka:9092"
         topics => ["logs"]
-        codec => "plain"
+        codec => "json"
         group_id => "logstash"
         auto_offset_reset => "earliest"
       }
     }
     
     filter {
-      json {
-        source => "message"
-      }
+      date {
+        match => [ "timestamp", "yyyy-MM-dd HH:mm:ss.SSS" ]
+        target => "@timestamp"
+      }    
     }
     
     output {
