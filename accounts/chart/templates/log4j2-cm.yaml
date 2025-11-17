@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fullname" . }}-log4j2-config
+  labels:
+    {{- include "labels" . | nindent 4 }}
+    app.kubernetes.io/component: logging
+data:
+  log4j2.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration status="WARN">
+        <Appenders>
+            <Console name="Console" target="SYSTEM_OUT">
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level - %msg%n"/>
+            </Console>
+            <Kafka name="Kafka" topic="logs" syncSend="false">
+                <PatternLayout pattern='{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}", "service":"${env:SERVICE_NAME}", "level":"%p",  "trace_id":"%X{traceId}", "span_id":"%X{spanId}", "message":"%enc{%m}{JSON}"}%n'/>
+                <Property name="bootstrap.servers">kafka:9092</Property>
+                <Property name="linger.ms">1000</Property>
+            </Kafka>
+        </Appenders>
+        <Loggers>
+            <Root level="info">
+                <AppenderRef ref="Kafka"/>
+            </Root>
+            <Logger name="org.apache.kafka" level="INFO">
+                <AppenderRef ref="Console"/>
+            </Logger>
+        </Loggers>
+    </Configuration>
