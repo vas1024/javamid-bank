@@ -12,8 +12,6 @@ helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
   --set kubeStateMetrics.enabled=false \
   --set nodeExporter.enabled=false \
   --set prometheus-node-exporter.enabled=false \
-  --wait \
-  --timeout 10m
 
 kubectl apply -f servicemonitor.yaml -n $NAMESPACE
 kubectl apply -f prometheusrule.yaml -n $NAMESPACE
