@@ -3,8 +3,9 @@ helm repo update prometheus-community
 
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
   --namespace $NAMESPACE \
-  --set admissionWebhooks.enabled=false \
   --set prometheusOperator.admissionWebhooks.enabled=false \
+  --set prometheusOperator.tls.enabled=false \
+  --set prometheusOperator.tlsProxy.enabled=false \
   --set grafana.sidecar.dashboards.enabled=true \
   --set grafana.sidecar.dashboards.label=grafana_dashboard \
   --set grafana.adminPassword=admin \
